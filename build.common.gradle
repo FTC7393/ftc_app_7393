@@ -93,11 +93,12 @@ android {
         jni.srcDirs = []
         jniLibs.srcDir rootProject.file('libs')
     }
-}
 
+}
 repositories {
     flatDir {
         dirs rootProject.file('libs')
     }
 }
+
 apply from: 'build.release.gradle'

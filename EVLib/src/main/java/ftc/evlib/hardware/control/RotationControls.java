@@ -1,12 +1,11 @@
 package ftc.evlib.hardware.control;
 
-import com.qualcomm.robotcore.hardware.GyroSensor;
-
 import ftc.electronvolts.util.ControlLoop;
 import ftc.electronvolts.util.InputExtractor;
 import ftc.electronvolts.util.ProportionalController;
 import ftc.electronvolts.util.Vector2D;
 import ftc.electronvolts.util.units.Angle;
+import ftc.evlib.hardware.sensors.Gyro;
 
 /**
  * This file was made by the electronVolts, FTC team 7393
@@ -73,7 +72,7 @@ public class RotationControls {
         };
     }
 
-    public static ftc.evlib.hardware.control.RotationControl gyro(GyroSensor gyro, Angle targetHeading, Angle tolerance) {
+    public static ftc.evlib.hardware.control.RotationControl gyro(Gyro gyro, Angle targetHeading, Angle tolerance) {
         return gyro(gyro, targetHeading, tolerance, ftc.evlib.hardware.control.RotationControl.DEFAULT_MAX_ANGULAR_SPEED);
     }
 
@@ -86,7 +85,7 @@ public class RotationControls {
      * @param maxAngularSpeed the max speed to rotate at
      * @return the created RotationControl
      */
-    public static ftc.evlib.hardware.control.RotationControl gyro(final GyroSensor gyro, final Angle targetHeading, final Angle tolerance, final double maxAngularSpeed) {
+    public static ftc.evlib.hardware.control.RotationControl gyro(final Gyro gyro, final Angle targetHeading, final Angle tolerance, final double maxAngularSpeed) {
 //        OptionsFile optionsFile = new OptionsFile(EVConverters.getInstance(), FileUtil.getOptionsFile("AutoOptions.txt"));
 //        double gain = optionsFile.get("gyro_gain", Double.class);
 //        double max = optionsFile.get("gyro_max", Double.class);
@@ -97,6 +96,7 @@ public class RotationControls {
         //                                                         gain,      innerDeadzone,                outerDeadzone,             minOutput,       maxOutput
         final ControlLoop gyroControl = new ProportionalController(0.4, tolerance.abs().radians(), Angle.fromDegrees(45).radians(), minAngularSpeed, maxAngularSpeed);
 
+//        final Vector2D targetHeadingVector = new Vector2D(1, Angle.multiply(targetHeading,-1));
         final Vector2D targetHeadingVector = new Vector2D(1, targetHeading);
 
         return new ftc.evlib.hardware.control.RotationControl() {
@@ -154,7 +154,7 @@ public class RotationControls {
      * @param gyro   the gyro to use for stabilization
      * @return the created RotationControl
      */
-    public static ftc.evlib.hardware.control.RotationControl teleOpGyro(InputExtractor<Double> driver, GyroSensor gyro, Angle tolerance) {
+    public static ftc.evlib.hardware.control.RotationControl teleOpGyro(InputExtractor<Double> driver, Gyro gyro, Angle tolerance) {
         return teleOpGyro(driver, gyro, tolerance, ftc.evlib.hardware.control.RotationControl.DEFAULT_MAX_ANGULAR_SPEED);
     }
 
@@ -174,13 +174,13 @@ public class RotationControls {
      * @param maxAngularSpeed the maximum speed to rotate at when doing gyro stabilization
      * @return the created RotationControl
      */
-    public static ftc.evlib.hardware.control.RotationControl teleOpGyro(final InputExtractor<Double> driver, final GyroSensor gyro, final Angle tolerance, final double maxAngularSpeed) {
+    public static ftc.evlib.hardware.control.RotationControl teleOpGyro(final InputExtractor<Double> driver, final Gyro gyro, final Angle tolerance, final double maxAngularSpeed) {
         final long DELAY_BEFORE_GYRO_CONTROL = 500;
         final long INIT_TIME = 4000;
 
         final long startTime = System.currentTimeMillis();
 
-        gyro.calibrate();
+       // gyro.calibrate();
 
         return new ftc.evlib.hardware.control.RotationControl() {
 

@@ -1,5 +1,7 @@
 package ftc.evlib.hardware.control;
 
+import android.util.Log;
+
 import java.util.Objects;
 
 import ftc.electronvolts.util.Vector2D;
@@ -7,6 +9,7 @@ import ftc.electronvolts.util.units.Angle;
 import ftc.electronvolts.util.units.Velocity;
 import ftc.evlib.hardware.control.XYRControl;
 import ftc.evlib.hardware.motors.MecanumMotors;
+import ftc.evlib.util.StepTimer;
 
 /**
  * This file was made by the electronVolts, FTC team 7393
@@ -163,16 +166,23 @@ public class MecanumControl {
     /**
      * update the motor powers based on the output of the translationControl and rotationControl
      */
+    private final StepTimer stepTimer = new StepTimer("mecanum", Log.VERBOSE);
+
     public void act() {
+        stepTimer.start();
+        stepTimer.step("translation");
+
         translationWorked = translationControl.act();
 
         //in case the same object is passed in that implements both controllers
+        stepTimer.step("rotation");
         if (Objects.equals(translationControl, rotationControl)) {
             rotationWorked = translationWorked;
         } else {
             rotationWorked = rotationControl.act();
         }
 
+        stepTimer.step("logic");
         Vector2D translation = translationControl.getTranslation();
 
         double velocity = translation.getLength();
@@ -190,10 +200,17 @@ public class MecanumControl {
                 velocityR
         );
 
+        stepTimer.step("motorsDrive");
+
         mecanumMotors.mecanumDrive();
+        stepTimer.step("motorsUpdate");
+
         mecanumMotors.update();
+        stepTimer.step("position");
 
         if (positionTracker != null) positionTracker.act();
+        stepTimer.stop();
+
     }
 
     private PositionTracker positionTracker = null;

@@ -2,8 +2,10 @@ package ftc.evlib.hardware.servos;
 
 import com.qualcomm.robotcore.hardware.Servo;
 
+import java.security.Key;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.NoSuchElementException;
 
 import ftc.electronvolts.util.files.OptionsFile;
 import ftc.evlib.hardware.servos.ServoName;
@@ -84,7 +86,11 @@ public class ServoControl {
      * @param speed  the speed to go at
      */
     public void goToPreset(Enum preset, double speed) {
-        this.targetPosition = presets.get(preset);
+        Double value = presets.get(preset);
+        if (value == null) {
+            throw new NoSuchElementException("Preset '"+preset.getDeclaringClass()+"."+preset.name()+"' not found for servo '"+getName().name()+"'");
+        }
+        this.targetPosition = value;
         this.speed = speed;
         done = false;
     }
@@ -117,6 +123,11 @@ public class ServoControl {
      */
     public double getCurrentPosition() {
         return currentPosition;
+    }
+
+
+    public double getTargetPosition() {
+        return targetPosition;
     }
 
     /**

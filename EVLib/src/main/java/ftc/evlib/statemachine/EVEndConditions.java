@@ -1,6 +1,5 @@
 package ftc.evlib.statemachine;
 
-import com.qualcomm.robotcore.hardware.GyroSensor;
 
 import ftc.electronvolts.statemachine.EndCondition;
 import ftc.electronvolts.statemachine.EndConditions;
@@ -12,6 +11,7 @@ import ftc.evlib.hardware.sensors.ColorSensor;
 import ftc.evlib.hardware.sensors.DigitalSensor;
 import ftc.evlib.hardware.sensors.DistanceSensor;
 import ftc.evlib.hardware.sensors.DoubleLineSensor;
+import ftc.evlib.hardware.sensors.Gyro;
 import ftc.evlib.hardware.sensors.LineFinder;
 import ftc.evlib.hardware.sensors.LineSensorArray;
 
@@ -171,9 +171,9 @@ public class EVEndConditions extends EndConditions {
      * @param targetDegrees    the target value (in degrees)
      * @param toleranceDegrees the accepted tolerance to be considered "close to" (in degrees)
      * @return the created EndCondition
-     * @see GyroSensor
+     * @see Gyro
      */
-    public static EndCondition gyroCloseTo(GyroSensor gyro, double targetDegrees, double toleranceDegrees) {
+    public static EndCondition gyroCloseTo(Gyro gyro, double targetDegrees, double toleranceDegrees) {
         return gyroCloseTo(gyro, Angle.fromDegrees(targetDegrees), Angle.fromDegrees(toleranceDegrees));
     }
 
@@ -184,9 +184,9 @@ public class EVEndConditions extends EndConditions {
      * @param target           the target value
      * @param toleranceDegrees the accepted tolerance to be considered "close to" (in degrees)
      * @return the created EndCondition
-     * @see GyroSensor
+     * @see Gyro
      */
-    public static EndCondition gyroCloseTo(GyroSensor gyro, Angle target, double toleranceDegrees) {
+    public static EndCondition gyroCloseTo(Gyro gyro, Angle target, double toleranceDegrees) {
         return gyroCloseTo(gyro, target, Angle.fromDegrees(toleranceDegrees));
     }
 
@@ -197,9 +197,9 @@ public class EVEndConditions extends EndConditions {
      * @param targetDegrees the target value (in degrees)
      * @param tolerance     the accepted tolerance to be considered "close to"
      * @return the created EndCondition
-     * @see GyroSensor
+     * @see Gyro
      */
-    public static EndCondition gyroCloseTo(GyroSensor gyro, double targetDegrees, Angle tolerance) {
+    public static EndCondition gyroCloseTo(Gyro gyro, double targetDegrees, Angle tolerance) {
         return gyroCloseTo(gyro, Angle.fromDegrees(targetDegrees), tolerance);
     }
 
@@ -210,9 +210,9 @@ public class EVEndConditions extends EndConditions {
      * @param target    the target value
      * @param tolerance the accepted tolerance to be considered "close to"
      * @return the created EndCondition
-     * @see GyroSensor
+     * @see Gyro
      */
-    public static EndCondition gyroCloseTo(final GyroSensor gyro, Angle target, final Angle tolerance) {
+    public static EndCondition gyroCloseTo(final Gyro gyro, Angle target, final Angle tolerance) {
         final Vector2D targetVector = new Vector2D(1, target);
         return new EndCondition() {
             @Override
@@ -235,9 +235,9 @@ public class EVEndConditions extends EndConditions {
      * @param target    the target value relative to the starting heading
      * @param tolerance the accepted tolerance to be considered "close to"
      * @return the created State
-     * @see GyroSensor
+     * @see Gyro
      */
-    public static EndCondition gyroCloseToRelative(final GyroSensor gyro, Angle target, final Angle tolerance) {
+    public static EndCondition gyroCloseToRelative(final Gyro gyro, Angle target, final Angle tolerance) {
         final Vector2D targetVector = new Vector2D(1, target);
         return new EndCondition() {
             double gyroInit = 0;

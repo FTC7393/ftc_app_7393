@@ -2,6 +2,7 @@ package ftc.evlib.statemachine;
 
 import android.util.Log;
 
+
 import com.qualcomm.robotcore.hardware.GyroSensor;
 
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackable;
@@ -42,6 +43,7 @@ import ftc.evlib.hardware.motors.TwoMotors;
 import ftc.evlib.hardware.sensors.DigitalSensor;
 import ftc.evlib.hardware.sensors.DistanceSensor;
 import ftc.evlib.hardware.sensors.DoubleLineSensor;
+import ftc.evlib.hardware.sensors.Gyro;
 import ftc.evlib.hardware.sensors.LineSensorArray;
 import ftc.evlib.hardware.servos.ServoControl;
 import ftc.evlib.hardware.servos.Servos;
@@ -110,7 +112,7 @@ public class EVStates extends States {
 //    }
 
 
-    public static State turnToFaceParticle(final StateName successState, final StateName noParticlesFoundState, final TeamColor teamColor, final Particles particles, final MecanumControl mecanumControl, final GyroSensor gyro, final Angle tolerance, final double maxAngularSpeed) {
+    public static State turnToFaceParticle(final StateName successState, final StateName noParticlesFoundState, final TeamColor teamColor, final Particles particles, final MecanumControl mecanumControl, final Gyro gyro, final Angle tolerance, final double maxAngularSpeed) {
         return new State() {
             boolean first = true;
             private EndCondition gyroEC;
@@ -147,7 +149,7 @@ public class EVStates extends States {
     }
 
 
-    public static State collectParticle(final StateName successState, final StateName noParticlesFoundState, final TeamColor teamColor, final Particles particles, final MecanumControl mecanumControl, final Motor collector, final GyroSensor gyro, final Angle tolerance, final boolean turnCollectorOff, final double maxAngularSpeed) {
+    public static State collectParticle(final StateName successState, final StateName noParticlesFoundState, final TeamColor teamColor, final Particles particles, final MecanumControl mecanumControl, final Motor collector, final Gyro gyro, final Angle tolerance, final boolean turnCollectorOff, final double maxAngularSpeed) {
         final double velocity = 1;
         final double collectorPower = 1;
         final Angle largeTolerance = Angle.fromDegrees(15);
@@ -730,10 +732,9 @@ public class EVStates extends States {
      * @param nextStateName the name of the next state
      * @param gyro          the gyro sensor to be calibrated
      * @return the created State
-     * @see GyroSensor
+     * @see Gyro
      */
-    public static State calibrateGyro(final StateName nextStateName, final GyroSensor gyro) {
-        gyro.calibrate();
+    public static State calibrateGyro(final StateName nextStateName, final Gyro gyro) {
         return new BasicAbstractState() {
             @Override
             public void init() {
@@ -881,24 +882,24 @@ public class EVStates extends States {
      * @param maxAngularSpeed the max speed to rotate to that angle
      * @return the created State
      * @see MecanumControl
-     * @see GyroSensor
+     * @see Gyro
      * @see Distance
      */
-    public static State mecanumDrive(final StateName nextStateName, final Distance distance, final MecanumControl mecanumControl, final GyroSensor gyro, final double velocity, final Angle direction, final Angle orientation, final Angle tolerance, final double maxAngularSpeed) {
+    public static State mecanumDrive(final StateName nextStateName, final Distance distance, final MecanumControl mecanumControl, final Gyro gyro, final double velocity, final Angle direction, final Angle orientation, final Angle tolerance, final double maxAngularSpeed) {
         return mecanumDrive(nextStateName, distance, mecanumControl,
                 RotationControls.gyro(gyro, orientation, tolerance, maxAngularSpeed),
                 TranslationControls.constant(velocity, direction)
         );
     }
 
-    public static State mecanumDrive(final StateName nextStateName, final Distance distance, final MecanumControl mecanumControl, final GyroSensor gyro, Vector2D vector2D, final Angle orientation, final Angle tolerance, final double maxAngularSpeed) {
+    public static State mecanumDrive(final StateName nextStateName, final Distance distance, final MecanumControl mecanumControl, final Gyro gyro, Vector2D vector2D, final Angle orientation, final Angle tolerance, final double maxAngularSpeed) {
         return mecanumDrive(nextStateName, distance, mecanumControl,
                 RotationControls.gyro(gyro, orientation, tolerance, maxAngularSpeed),
                 TranslationControls.constant(vector2D)
         );
     }
 
-    public static State mecanumDrive(StateName nextStateName, Distance distance, final MecanumControl mecanumControl, final GyroSensor gyro, Vector2D vector2D, final Angle orientation, final Angle tolerance) {
+    public static State mecanumDrive(StateName nextStateName, Distance distance, final MecanumControl mecanumControl, final Gyro gyro, Vector2D vector2D, final Angle orientation, final Angle tolerance) {
         return mecanumDrive(nextStateName, distance, mecanumControl, gyro, vector2D, orientation, tolerance, RotationControl.DEFAULT_MAX_ANGULAR_SPEED);
     }
 
@@ -979,9 +980,9 @@ public class EVStates extends States {
      * @param maxAngularSpeed the max speed to rotate to that angle
      * @return the created State
      * @see MecanumControl
-     * @see GyroSensor
+     * @see Gyro
      */
-    public static State mecanumDrive(Map<StateName, EndCondition> transitions, final MecanumControl mecanumControl, final GyroSensor gyro, final double velocity, final Angle direction, final Angle orientation, final Angle tolerance, final double maxAngularSpeed) {
+    public static State mecanumDrive(Map<StateName, EndCondition> transitions, final MecanumControl mecanumControl, final Gyro gyro, final double velocity, final Angle direction, final Angle orientation, final Angle tolerance, final double maxAngularSpeed) {
 //        OptionsFile optionsFile = new OptionsFile(EVConverters.getInstance(), FileUtil.getOptionsFile("AutoOptions.txt"));
 //
 //        double max = optionsFile.get("gyro_max", Double.class);
@@ -996,14 +997,14 @@ public class EVStates extends States {
     }
 
 
-    public static State mecanumDrive(Map<StateName, EndCondition> transitions, final MecanumControl mecanumControl, final GyroSensor gyro, Vector2D vector2D, final Angle orientation, final Angle tolerance, final double maxAngularSpeed) {
+    public static State mecanumDrive(Map<StateName, EndCondition> transitions, final MecanumControl mecanumControl, final Gyro gyro, Vector2D vector2D, final Angle orientation, final Angle tolerance, final double maxAngularSpeed) {
         return mecanumDrive(transitions, mecanumControl,
                 RotationControls.gyro(gyro, orientation, tolerance, maxAngularSpeed),
                 TranslationControls.constant(vector2D)
         );
     }
 
-    public static State mecanumDrive(Map<StateName, EndCondition> transitions, MecanumControl mecanumControl, GyroSensor gyro, Vector2D vector2D, Angle orientation, final Angle tolerance) {
+    public static State mecanumDrive(Map<StateName, EndCondition> transitions, MecanumControl mecanumControl, Gyro gyro, Vector2D vector2D, Angle orientation, final Angle tolerance) {
         return mecanumDrive(transitions, mecanumControl, gyro, vector2D, orientation, tolerance, RotationControl.DEFAULT_MAX_ANGULAR_SPEED);
     }
 
@@ -1036,9 +1037,9 @@ public class EVStates extends States {
      * @param orientation    the angle to rotate to
      * @return the created State
      * @see MecanumControl
-     * @see GyroSensor
+     * @see Gyro
      */
-    public static State mecanumDrive(Map<StateName, EndCondition> transitions, MecanumControl mecanumControl, GyroSensor gyro, double velocity, Angle direction, Angle orientation, final Angle tolerance) {
+    public static State mecanumDrive(Map<StateName, EndCondition> transitions, MecanumControl mecanumControl, Gyro gyro, double velocity, Angle direction, Angle orientation, final Angle tolerance) {
         return mecanumDrive(transitions, mecanumControl, gyro, velocity, direction, orientation, tolerance, RotationControl.DEFAULT_MAX_ANGULAR_SPEED);
     }
 
@@ -1055,10 +1056,10 @@ public class EVStates extends States {
      * @param orientation    the angle to rotate to
      * @return the created State
      * @see MecanumControl
-     * @see GyroSensor
+     * @see Gyro
      * @see Distance
      */
-    public static State mecanumDrive(StateName nextStateName, Distance distance, final MecanumControl mecanumControl, final GyroSensor gyro, final double velocity, final Angle direction, final Angle orientation, final Angle tolerance) {
+    public static State mecanumDrive(StateName nextStateName, Distance distance, final MecanumControl mecanumControl, final Gyro gyro, final double velocity, final Angle direction, final Angle orientation, final Angle tolerance) {
         return mecanumDrive(nextStateName, distance, mecanumControl, gyro, velocity, direction, orientation, tolerance, RotationControl.DEFAULT_MAX_ANGULAR_SPEED);
     }
 
@@ -1248,7 +1249,7 @@ public class EVStates extends States {
      * @return the created State
      * @see TwoMotors
      */
-    public static State turn(StateName nextStateName, Angle angle, GyroSensor gyro, TwoMotors twoMotors, double velocity) {
+    public static State turn(StateName nextStateName, Angle angle, Gyro gyro, TwoMotors twoMotors, double velocity) {
         return turn(StateMap.of(
                 nextStateName,
                 EVEndConditions.gyroCloseToRelative(gyro, angle, Angle.fromDegrees(5))
@@ -1292,7 +1293,7 @@ public class EVStates extends States {
      * @return the created State
      * @see TwoMotors
      */
-    public static State turn(StateName nextStateName, Angle angle, GyroSensor gyro, TwoMotors twoMotors, boolean isRightWheel, double velocity) {
+    public static State turn(StateName nextStateName, Angle angle, Gyro gyro, TwoMotors twoMotors, boolean isRightWheel, double velocity) {
         double velocity1 = Math.abs(velocity) * Math.signum(angle.radians());
         if (isRightWheel) {
             velocity1 *= -1;
@@ -1380,78 +1381,82 @@ public class EVStates extends States {
         };
     }
 
-    /**
-     * Line up with the beacon using the line sensor array and distance sensor
-     *
-     * @param successState      the state to go to if the line up succeeds
-     * @param failState         the state to go to if the line up fails
-     * @param mecanumControl    the mecanum wheels
-     * @param direction         the direction angle to face
-     * @param gyro              the gyro to use for rotation stabilization
-     * @param distSensor        the distance sensor to detect distance from the beacon
-     * @param lineSensorArray   the line sensor array to line up sideways with the line
-     * @param teamColor         the team you are on and ...
-     * @param beaconColorResult ... the beacon configuration to decide which button to line up with
-     * @param distance          the distance from the beacon to line up to
-     * @return the created State
-     * @see LineUpControl
-     */
-    public static State beaconLineUp(final StateName successState, final StateName failState, final MecanumControl mecanumControl, final Angle direction, final GyroSensor gyro, final DistanceSensor distSensor, final LineSensorArray lineSensorArray, TeamColor teamColor, final ResultReceiver<BeaconColorResult> beaconColorResult, final Distance distance) {
-//        final EndCondition distEndCondition = EVEndConditions.distanceSensorLess(distSensor, Distance.add(distance, Distance.fromInches(4)));
-        final EndCondition distEndCondition = EVEndConditions.distanceSensorLess(distSensor, distance);
-        final EndCondition gyroEndCondition = EVEndConditions.gyroCloseTo(gyro, direction, 2);
+//    /**
+//     * Line up with the beacon using the line sensor array and distance sensor
+//     *
+//     * @param successState      the state to go to if the line up succeeds
+//     * @param failState         the state to go to if the line up fails
+//     * @param mecanumControl    the mecanum wheels
+//     * @param direction         the direction angle to face
+//     * @param gyro              the gyro to use for rotation stabilization
+//     * @param distSensor        the distance sensor to detect distance from the beacon
+//     * @param lineSensorArray   the line sensor array to line up sideways with the line
+//     * @param teamColor         the team you are on and ...
+//     * @param beaconColorResult ... the beacon configuration to decide which button to line up with
+//     * @param distance          the distance from the beacon to line up to
+//     * @return the created State
+//     * @see LineUpControl
+//     */
+//    public static State beaconLineUp(final StateName successState, final StateName failState, final MecanumControl mecanumControl, final Angle direction, final Gyro gyro, final DistanceSensor distSensor, final LineSensorArray lineSensorArray, TeamColor teamColor, final ResultReceiver<BeaconColorResult> beaconColorResult, final Distance distance) {
+////        final EndCondition distEndCondition = EVEndConditions.distanceSensorLess(distSensor, Distance.add(distance, Distance.fromInches(4)));
+//        final EndCondition distEndCondition = EVEndConditions.distanceSensorLess(distSensor, distance);
+//        final EndCondition gyroEndCondition = EVEndConditions.gyroCloseTo(gyro, direction, 2);
+//
+//        final BeaconColorResult.BeaconColor myColor = BeaconColorResult.BeaconColor.fromTeamColor(teamColor);
+//        final BeaconColorResult.BeaconColor opponentColor = BeaconColorResult.BeaconColor.fromTeamColor(teamColor.opposite());
+//
+//        return new BasicAbstractState() {
+//            private boolean success;
+//            LineUpControl.Button buttonToLineUpWith;
+//
+//            @Override
+//            public void init() {
+//                buttonToLineUpWith = null;
+//                if (beaconColorResult.isReady()) {
+//                    BeaconColorResult result = beaconColorResult.getValue();
+//                    BeaconColorResult.BeaconColor leftColor = result.getLeftColor();
+//                    BeaconColorResult.BeaconColor rightColor = result.getRightColor();
+//                    if (Objects.equals(leftColor, myColor) && Objects.equals(rightColor, opponentColor)) {
+//                        buttonToLineUpWith = LineUpControl.Button.LEFT;
+//                    }
+//                    if (Objects.equals(leftColor, opponentColor) && Objects.equals(rightColor, myColor)) {
+//                        buttonToLineUpWith = LineUpControl.Button.RIGHT;
+//                    }
+//                }
+//
+//                success = buttonToLineUpWith != null;
+//
+//                LineUpControl lineUpControl = new LineUpControl(lineSensorArray, buttonToLineUpWith, distSensor, distance, gyro, direction);
+//
+//                mecanumControl.setTranslationControl(lineUpControl);
+//                mecanumControl.setRotationControl(lineUpControl);
+//
+//                distEndCondition.init();
+//                gyroEndCondition.init();
+//            }
+//
+//            @Override
+//            public boolean isDone() {
+//
+//                if (!mecanumControl.translationWorked()) {
+//                    success = false;
+//                }
+//                return !success || distEndCondition.isDone();
+//            }
+//
+//            @Override
+//            public StateName getNextStateName() {
+//                mecanumControl.stop();
+//                return success ? successState : failState;
+//            }
+//        };}
 
-        final BeaconColorResult.BeaconColor myColor = BeaconColorResult.BeaconColor.fromTeamColor(teamColor);
-        final BeaconColorResult.BeaconColor opponentColor = BeaconColorResult.BeaconColor.fromTeamColor(teamColor.opposite());
 
-        return new BasicAbstractState() {
-            private boolean success;
-            LineUpControl.Button buttonToLineUpWith;
-
-            @Override
-            public void init() {
-                buttonToLineUpWith = null;
-                if (beaconColorResult.isReady()) {
-                    BeaconColorResult result = beaconColorResult.getValue();
-                    BeaconColorResult.BeaconColor leftColor = result.getLeftColor();
-                    BeaconColorResult.BeaconColor rightColor = result.getRightColor();
-                    if (Objects.equals(leftColor, myColor) && Objects.equals(rightColor, opponentColor)) {
-                        buttonToLineUpWith = LineUpControl.Button.LEFT;
-                    }
-                    if (Objects.equals(leftColor, opponentColor) && Objects.equals(rightColor, myColor)) {
-                        buttonToLineUpWith = LineUpControl.Button.RIGHT;
-                    }
-                }
-
-                success = buttonToLineUpWith != null;
-
-                LineUpControl lineUpControl = new LineUpControl(lineSensorArray, buttonToLineUpWith, distSensor, distance, gyro, direction);
-
-                mecanumControl.setTranslationControl(lineUpControl);
-                mecanumControl.setRotationControl(lineUpControl);
-
-                distEndCondition.init();
-                gyroEndCondition.init();
-            }
-
-            @Override
-            public boolean isDone() {
-
-                if (!mecanumControl.translationWorked()) {
-                    success = false;
-                }
-                return !success || distEndCondition.isDone();
-            }
-
-            @Override
-            public StateName getNextStateName() {
-                mecanumControl.stop();
-                return success ? successState : failState;
-            }
-        };
+    public static State gyroTurn(StateName nextStateName, final MecanumControl mecanumControl, final Gyro gyro, final Angle orientation, final Angle tolerance) {
+    return gyroTurn(nextStateName,mecanumControl,gyro,orientation,tolerance,1);
     }
 
-    public static State gyroTurn(StateName nextStateName, final MecanumControl mecanumControl, final GyroSensor gyro, final Angle orientation, final Angle tolerance) {
+    public static State gyroTurn(StateName nextStateName, final MecanumControl mecanumControl, final Gyro gyro, final Angle orientation, final Angle tolerance,final double speed) {
         Map<StateName, EndCondition> transitions = StateMap.of(
                 nextStateName,
                 EVEndConditions.gyroCloseTo(gyro, orientation, tolerance)
@@ -1461,7 +1466,7 @@ public class EVStates extends States {
             @Override
             public void init() {
                 mecanumControl.setTranslationControl(TranslationControls.ZERO);
-                mecanumControl.setRotationControl(RotationControls.gyro(gyro, orientation, tolerance, 1));
+                mecanumControl.setRotationControl(RotationControls.gyro(gyro, orientation, tolerance, speed));
             }
 
             @Override
@@ -1523,6 +1528,66 @@ public class EVStates extends States {
             @Override
             public boolean isDone() {
                 return !waitForDone || servoControl.isDone();
+            }
+
+            @Override
+            public StateName getNextStateName() {
+                return nextStateName;
+            }
+        };
+    }
+    public static State servoAdd(final StateName nextStateName, final ServoControl servoControl, final double numToAdd, final boolean waitForDone) {
+        return new BasicAbstractState() {
+
+            @Override
+            public void init() {
+
+                servoControl.setPosition(Utility.servoLimit(servoControl.getCurrentPosition()+numToAdd));
+            }
+
+            @Override
+            public boolean isDone() {
+                return !waitForDone || servoControl.isDone();
+            }
+
+            @Override
+            public StateName getNextStateName() {
+                return nextStateName;
+            }
+        };
+    }
+    public static State servoAdd(final StateName nextStateName, final ServoControl servoControl, final double numToAdd,final double speed, final boolean waitForDone) {
+        return new BasicAbstractState() {
+
+            @Override
+            public void init() {
+
+                servoControl.setPosition(Utility.servoLimit(servoControl.getCurrentPosition()+numToAdd),speed);
+            }
+
+            @Override
+            public boolean isDone() {
+                return !waitForDone || servoControl.isDone();
+            }
+
+            @Override
+            public StateName getNextStateName() {
+                return nextStateName;
+            }
+        };
+    }
+
+    public static State resultReceiverReady(final StateName nextStateName, final ResultReceiver resultReceiver){
+        return new BasicAbstractState() {
+
+            @Override
+            public void init() {
+
+            }
+
+            @Override
+            public boolean isDone() {
+                return resultReceiver.isReady();
             }
 
             @Override

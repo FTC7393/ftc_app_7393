@@ -273,7 +273,7 @@ public class Motors {
         });
 
         return new ftc.evlib.hardware.motors.Motor() {
-            private double power = 0;
+            private double power = 0,lastPower=0;
 
             @Override
             public void setPower(double power) {
@@ -292,7 +292,10 @@ public class Motors {
 
             @Override
             public void update() {
-                dcMotor.setPower(Utility.motorLimit(power));
+                if(power!=lastPower) {
+                    lastPower=power;
+                    dcMotor.setPower(Utility.motorLimit(power));
+                }
             }
         };
     }
@@ -385,7 +388,7 @@ public class Motors {
         return new MotorEnc() {
             private int encoderZero = 0, encoderPosition = 0;
             private Mode mode = initMode, lastMode = initMode;
-            private double power = 0;
+            private double power = 0,lastPower=0;
             private int encoderTarget = 0;
 
             @Override
@@ -432,6 +435,7 @@ public class Motors {
                 encoderPosition = dcMotor.getCurrentPosition();
 
                 if (mode != lastMode) {
+
                     dcMotor.setMode(motorModeToDcMotorRunMode(mode));
                     lastMode = dcMotorRunModeToMotorMode(dcMotor.getMode());
                 }
@@ -439,7 +443,10 @@ public class Motors {
                 if (mode == Mode.POSITION) {
                     dcMotor.setTargetPosition(encoderTarget);
                 }
-                dcMotor.setPower(Utility.motorLimit(power));
+                if(power!=lastPower) {
+                    lastPower=power;
+                    dcMotor.setPower(Utility.motorLimit(power));
+                }
             }
         };
     }
