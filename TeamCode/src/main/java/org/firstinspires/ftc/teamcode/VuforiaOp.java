@@ -14,12 +14,11 @@ import ftc.electronvolts.util.ResultReceiver;
 import ftc.electronvolts.util.TeamColor;
 import ftc.electronvolts.util.files.Logger;
 import ftc.electronvolts.util.units.Time;
-import ftc.evlib.driverstation.Telem;
-import ftc.evlib.hardware.config.RobotCfg;
-import ftc.evlib.opmodes.AbstractAutoOp;
-import ftc.evlib.statemachine.EVStates;
-import ftc.evlib.vision.framegrabber.VuforiaFrameFeeder;
-import ftc.evlib.vision.processors.BeaconColorResult;
+import evlib.hardware.config.RobotCfg;
+import evlib.opmodes.AbstractAutoOp;
+import evlib.statemachine.EVStates;
+import evlib.vision.framegrabber.VuforiaFrameFeeder;
+import evlib.vision.processors.BeaconColorResult;
 
 /**
  * This file was made by the electronVolts, FTC team 7393

@@ -8,8 +8,8 @@ import java.util.Arrays;
 
 import ftc.electronvolts.util.Function;
 import ftc.electronvolts.util.Functions;
-import ftc.evlib.opmodes.AbstractOptionsOp;
-import ftc.evlib.util.FileUtil;
+import evlib.opmodes.AbstractOptionsOp;
+import evlib.util.FileUtil;
 
 /**
  * This file was made by the electronVolts, FTC team 7393

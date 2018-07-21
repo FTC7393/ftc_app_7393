@@ -4,7 +4,9 @@ import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 
-import ftc.evlib.hardware.sensors.Gyro;
+import org.firstinspires.ftc.teamcode.relic2017.Mechanisms.IMUGyro;
+
+import evlib.hardware.sensors.Gyro;
 
 
 /**

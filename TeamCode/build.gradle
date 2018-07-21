@@ -15,7 +15,8 @@ android {
 }
 dependencies {
     implementation files('lib/junit-4.12.jar')
-//    implementation files('src/main/java/guava-20.0.jar')
-//    implementation files('src/main/java/Vuforia.jar')
-    implementation project(':EVLib')
+    implementation files('../libs/guava-20.0.jar')
+    //    implementation files('src/main/java/Vuforia.jar')
+    //    implementation project(':EVLib')
+    implementation project(':openCVLibrary310')
 }

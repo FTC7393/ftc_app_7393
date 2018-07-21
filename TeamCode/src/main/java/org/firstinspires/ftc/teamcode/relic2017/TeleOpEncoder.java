@@ -8,9 +8,9 @@
 //import ftc.electronvolts.util.InputExtractor;
 //import ftc.electronvolts.util.InputExtractors;
 //import ftc.electronvolts.util.files.Logger;
-//import ftc.evlib.hardware.control.RotationControls;
-//import ftc.evlib.hardware.control.TranslationControls;
-//import ftc.evlib.opmodes.AbstractTeleOp;
+//import evlib.hardware.control.RotationControls;
+//import evlib.hardware.control.TranslationControls;
+//import evlib.opmodes.AbstractTeleOp;
 //
 ///**
 // * Created by ftc7393 on 11/24/2017.

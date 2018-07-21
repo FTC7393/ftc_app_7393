@@ -4,6 +4,8 @@ import com.google.common.io.BaseEncoding;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.exception.RobotCoreException;
 
+import org.firstinspires.ftc.teamcode.relic2017.Sparky2017.TeleOp2017;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
@@ -11,8 +13,8 @@ import java.io.IOException;
 
 import ftc.electronvolts.util.files.Logger;
 import ftc.electronvolts.util.files.OptionsFile;
-import ftc.evlib.util.EVConverters;
-import ftc.evlib.util.FileUtil;
+import evlib.util.EVConverters;
+import evlib.util.FileUtil;
 
 /**
  * This file was made by the electronVolts, FTC team 7393

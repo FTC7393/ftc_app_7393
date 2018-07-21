@@ -7,10 +7,10 @@
 //import ftc.electronvolts.util.Function;
 //import ftc.electronvolts.util.Functions;
 //import ftc.electronvolts.util.PIDController;
-//import ftc.evlib.hardware.motors.Motor;
-//import ftc.evlib.hardware.motors.MotorEnc;
-//import ftc.evlib.hardware.sensors.DigitalSensor;
-//import ftc.evlib.hardware.servos.ServoControl;
+//import evlib.hardware.motors.Motor;
+//import evlib.hardware.motors.MotorEnc;
+//import evlib.hardware.sensors.DigitalSensor;
+//import evlib.hardware.servos.ServoControl;
 //
 ///**
 // * Created by ftc7393 on 11/26/2017.
@@ -85,8 +85,8 @@
 //            canUserSwitch = false;
 //        }
 //
-//        Mode(boolean openServo) {
-//            canOpenServo = openServo;
+//        Mode(boolean haltServo) {
+//            canOpenServo = haltServo;
 //            canUserSwitch = true;
 //        }
 //
@@ -104,7 +104,7 @@
 //    private enum ServoAction {
 //        OPEN,
 //        OPENING,
-//        CLOSED,
+//        EJECT,
 //        CLOSING
 //    }
 //
@@ -115,7 +115,7 @@
 //    }
 //
 //    private Mode mode = Mode.UNKNOWN;//at the end of auto, it is at DH
-//    private ServoAction servoAction = ServoAction.CLOSED;
+//    private ServoAction servoAction = ServoAction.EJECT;
 //    private double beltPower = 0;
 //
 //    private final MotorEnc lift;
@@ -382,7 +382,7 @@
 //        // Update servo state machine if it is finished moving
 //        if (release.isDone()) {
 //            if (servoAction == ServoAction.CLOSING) {
-//                servoAction = ServoAction.CLOSED;
+//                servoAction = ServoAction.EJECT;
 //            } else if (servoAction == ServoAction.OPENING) {
 //                servoAction = ServoAction.OPEN;
 //            }
@@ -391,7 +391,7 @@
 //
 //        // BELT ACTION
 //        // Only run belt when servo is closed
-//        if (servoAction == ServoAction.CLOSED) {
+//        if (servoAction == ServoAction.EJECT) {
 //            belt.setPower(beltPower);
 //        } else {
 //            belt.setPower(0);
@@ -459,7 +459,7 @@
 ////        littleUp = LittleUp.LITTLE_UP;
 ////    }
 //
-//    public void openServo() {
+//    public void haltServo() {
 //        if (!mode.canOpenServo()) {
 //            return;
 //        }
@@ -474,19 +474,19 @@
 //        }
 //
 //        servoAction = ServoAction.OPENING;
-//        release.goToPreset(RobotCfg2017.ReleaseServoPresets.OPENED, 3);
+//        release.goToPreset(RobotCfg2017.ReleaseServoPresets.HALT, 3);
 //    }
 //
-//    public void closeServo() {
+//    public void ejectServo() {
 //        servoAction = ServoAction.CLOSING;
-//        release.goToPreset(RobotCfg2017.ReleaseServoPresets.CLOSED, 3);
+//        release.goToPreset(RobotCfg2017.ReleaseServoPresets.EJECT, 3);
 //    }
 //
 //    public void toggleServo() {
 //        if (servoAction == ServoAction.OPEN || servoAction == ServoAction.OPENING) {
-//            closeServo();
-//        } else if (servoAction == ServoAction.CLOSED || servoAction == ServoAction.CLOSING) {
-//            openServo();
+//            ejectServo();
+//        } else if (servoAction == ServoAction.EJECT || servoAction == ServoAction.CLOSING) {
+//            haltServo();
 //        }
 //
 //

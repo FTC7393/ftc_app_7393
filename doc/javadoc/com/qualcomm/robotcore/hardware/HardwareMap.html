@@ -191,7 +191,7 @@ implements java.lang.Iterable&lt;<a href="../../../../com/qualcomm/robotcore/har
 </tr>
 <tr class="rowColor">
 <td class="colFirst"><code><a href="../../../../com/qualcomm/robotcore/hardware/HardwareMap.DeviceMapping.html" title="class in com.qualcomm.robotcore.hardware">HardwareMap.DeviceMapping</a>&lt;<a href="../../../../com/qualcomm/robotcore/hardware/ColorSensor.html" title="interface in com.qualcomm.robotcore.hardware">ColorSensor</a>&gt;</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../../com/qualcomm/robotcore/hardware/HardwareMap.html#colorSensor">colorSensor</a></span></code>&nbsp;</td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../com/qualcomm/robotcore/hardware/HardwareMap.html#colorDigitalSensor">colorDigitalSensor</a></span></code>&nbsp;</td>
 </tr>
 <tr class="altColor">
 <td class="colFirst"><code><a href="../../../../com/qualcomm/robotcore/hardware/HardwareMap.DeviceMapping.html" title="class in com.qualcomm.robotcore.hardware">HardwareMap.DeviceMapping</a>&lt;<a href="../../../../com/qualcomm/robotcore/hardware/CompassSensor.html" title="interface in com.qualcomm.robotcore.hardware">CompassSensor</a>&gt;</code></td>
@@ -551,13 +551,13 @@ implements java.lang.Iterable&lt;<a href="../../../../com/qualcomm/robotcore/har
 <pre>public&nbsp;<a href="../../../../com/qualcomm/robotcore/hardware/HardwareMap.DeviceMapping.html" title="class in com.qualcomm.robotcore.hardware">HardwareMap.DeviceMapping</a>&lt;<a href="../../../../com/qualcomm/robotcore/hardware/AnalogOutput.html" title="class in com.qualcomm.robotcore.hardware">AnalogOutput</a>&gt; analogOutput</pre>
 </li>
 </ul>
-<a name="colorSensor">
+<a name="colorDigitalSensor">
 <!--   -->
 </a>
 <ul class="blockList">
 <li class="blockList">
-<h4>colorSensor</h4>
-<pre>public&nbsp;<a href="../../../../com/qualcomm/robotcore/hardware/HardwareMap.DeviceMapping.html" title="class in com.qualcomm.robotcore.hardware">HardwareMap.DeviceMapping</a>&lt;<a href="../../../../com/qualcomm/robotcore/hardware/ColorSensor.html" title="interface in com.qualcomm.robotcore.hardware">ColorSensor</a>&gt; colorSensor</pre>
+<h4>colorDigitalSensor</h4>
+<pre>public&nbsp;<a href="../../../../com/qualcomm/robotcore/hardware/HardwareMap.DeviceMapping.html" title="class in com.qualcomm.robotcore.hardware">HardwareMap.DeviceMapping</a>&lt;<a href="../../../../com/qualcomm/robotcore/hardware/ColorSensor.html" title="interface in com.qualcomm.robotcore.hardware">ColorSensor</a>&gt; colorDigitalSensor</pre>
 </li>
 </ul>
 <a name="led">
@@ -715,7 +715,7 @@ implements java.lang.Iterable&lt;<a href="../../../../com/qualcomm/robotcore/har
 
  <pre>
     DcMotor motorLeft = hardwareMap.get(DcMotor.class, "motorLeft");
-    ColorSensor colorSensor = hardwareMap.get(ColorSensor.class, "myColorSensor");
+    ColorSensor colorDigitalSensor = hardwareMap.get(ColorSensor.class, "myColorSensor");
  </pre></div>
 <dl>
 <dt><span class="paramLabel">Parameters:</span></dt>
@@ -744,7 +744,7 @@ implements java.lang.Iterable&lt;<a href="../../../../com/qualcomm/robotcore/har
 
  <pre>
     DcMotor motorLeft = (DcMotor)hardwareMap.get("motorLeft");
-    ColorSensor colorSensor = (ColorSensor)hardwareMap.get("myColorSensor");
+    ColorSensor colorDigitalSensor = (ColorSensor)hardwareMap.get("myColorSensor");
  </pre></div>
 <dl>
 <dt><span class="paramLabel">Parameters:</span></dt>
