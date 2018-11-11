@@ -18,5 +18,6 @@ dependencies {
     implementation files('../libs/guava-20.0.jar')
     //    implementation files('src/main/java/Vuforia.jar')
     //    implementation project(':EVLib')
-    implementation project(':openCVLibrary310')
+    implementation project(':DogeCV')
+    implementation project(':openCVLibrary3')
 }

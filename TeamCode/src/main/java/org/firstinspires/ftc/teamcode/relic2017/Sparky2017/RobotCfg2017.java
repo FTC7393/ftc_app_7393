@@ -201,7 +201,7 @@ public class RobotCfg2017 extends RobotCfg {
         leftColorSensor = hardwareMap.colorSensor.get(LEFT_COLOR_SENSOR_NAME);
         rightColorSensor = hardwareMap.colorSensor.get(RIGHT_COLOR_SENSOR_NAME);
         potentiometer= Sensors.analog(hardwareMap,"potent");
-        servos=new Servos(ServoCfg.createServoMap(hardwareMap, servoStartPresetMap));
+        servos = new Servos(ServoCfg.createServoMap(hardwareMap, servoStartPresetMap));
 
 //        BNO055IMU.Parameters parameters = new BNO055IMU.Parameters();
 //        parameters.angleUnit = BNO055IMU.AngleUnit.DEGREES;
@@ -377,9 +377,6 @@ public class RobotCfg2017 extends RobotCfg {
 
 
 }
-    public Servos getServos() {
-        return servos;
-    }
 
     public MecanumControl getMecanumControl() {
         return mecanumControl;
