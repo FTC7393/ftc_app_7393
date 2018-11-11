@@ -34,8 +34,8 @@ public class RoverRuckusRobotCfg extends RobotCfg {
     private final Arm arm;
     private static final Velocity MAX_ROBOT_SPEED = new Velocity(Distance.fromInches(57 * 4), Time.fromSeconds(2.83));
     private static final Velocity MAX_ROBOT_SPEED_SIDEWAYS = new Velocity(Distance.fromInches(21.2441207039), Time.fromSeconds(1));
-    private static final String LEFT_COLOR_SENSOR_NAME = "left_color";
-    private static final String RIGHT_COLOR_SENSOR_NAME = "right_color";
+    private static final String LEFT_COLOR_SENSOR_NAME = "colorBackLeft";
+    private static final String RIGHT_COLOR_SENSOR_NAME = "colorBackRight";
     private IMUGyro gyro;
     private final Servos servos;
 
@@ -122,6 +122,7 @@ public class RoverRuckusRobotCfg extends RobotCfg {
     @Override
     public void act() {
         mecanumControl.act();
+        arm.act();
 
     }
 

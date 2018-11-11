@@ -114,6 +114,8 @@ public class RoverRuckusTeleOp extends AbstractTeleOp<RoverRuckusRobotCfg>{
 //testARm
         robotCfg.getArm().controlExtension(driver2.left_stick_y.getValue());
         robotCfg.getArm().controlRotation(driver2.right_stick_y.getValue());
+        telemetry.addData("rotationEncoder",robotCfg.getArm().getRotationEncoder());
+        telemetry.addData("extensionEncoder",robotCfg.getArm().getExtensionEncoder());
 
     }
 
