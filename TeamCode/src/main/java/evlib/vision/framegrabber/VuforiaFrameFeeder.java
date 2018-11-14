@@ -18,6 +18,7 @@ import com.vuforia.Vuforia;
 
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackable;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackables;
+import org.firstinspires.ftc.robotcore.internal.vuforia.VuforiaException;
 import org.firstinspires.ftc.robotcore.internal.vuforia.VuforiaLocalizerImpl;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -115,7 +116,7 @@ public class VuforiaFrameFeeder extends VuforiaLocalizerImpl {
         VuforiaFrameFeeder vuforia;
         try {
             vuforia = new VuforiaFrameFeeder(params, widthRequest, heightRequest);
-        } catch (VuforiaLocalizerImpl.FailureException e) {
+        } catch (VuforiaException e) {
             return null;
         }
 

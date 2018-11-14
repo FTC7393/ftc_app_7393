@@ -57,7 +57,7 @@ import java.util.Locale;
 @Autonomous(name = "Sensor: BNO055 IMU", group = "Sensor")
 // Comment this out to add to the opmode list
 
-public class GyroOld extends OpMode
+public class GyroOld2 extends OpMode
 {
     //----------------------------------------------------------------------------------------------
     // State

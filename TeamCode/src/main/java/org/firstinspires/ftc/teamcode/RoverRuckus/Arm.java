@@ -30,15 +30,17 @@ public class Arm {
     private double rotationEncoder=0;
     private double extensionEncoder=0;
 
-    int maxRotationPosition =600;
+    int maxRotationPosition =4696;
     int dumpRotationPosition=600;
 
     int dumpExtensionPosition=600;
-    int maxExtensionPosition=600;
+    int maxExtensionPosition=2685;
     int minRotationPosition=0;
     int minExtensionPosition=0;
-    int rotationSetPoint=0;
+    double rotationSetPoint=0;
     double rotationPower=0;
+    double extensionSetPoint=0;
+    double extensionPower=0;
 
 
     public Arm(MotorEnc extension, DigitalSensor extensionLimit, MotorEnc rotation, DigitalSensor rotationLimit) {
@@ -47,51 +49,67 @@ public class Arm {
         this.rotation = rotation;
         this.rotationLimit= new DigitalInputEdgeDetector(rotationLimit);
 
-        this.rotationPID=new PIDController(0,0,0,0);
-        this.extensionPID=new PIDController(0,0,0,0);
+        this.rotationPID=new PIDController(0.001,0.0002,.00006,1);
+        this.extensionPID=new PIDController(0.003,0,0,1);
 
     }
 
     public void act() {
-        extension.update();
-        rotation.update();
+
         rotationEncoder=rotation.getEncoderPosition();
         extensionEncoder=extension.getEncoderPosition();
-//        if( rotationLimit.justPressed()==true){
+//        if( rotationLimit.isPressed()==true){
 //            rotation.resetEncoder();
-//            minRotationPosition=0;
 //
 //        }
 //
-//        if( extensionLimit.justPressed()==true){
+//        if( extensionLimit.isPressed()==true){
 //            extension.resetEncoder();
-//            minExtensionPosition=0;
 //
 //        }
-////        rotationPower=rotationPID.computeCorrection(rotationSetPoint,rotationEncoder);
+        rotationPower=rotationPID.computeCorrection(rotationSetPoint,rotationEncoder);
+        extensionPower=extensionPID.computeCorrection(extensionSetPoint,extensionEncoder);
+
 //        rotation.setSpeed(rotationPower);
 //        if(rotationSetPoint>maxRotationPosition){
 //            rotationSetPoint=maxRotationPosition;
 //        }
-//        rotation.setPosition(rotationSetPoint,rotationPower);
-//
+//        if(rotationSetPoint<minRotationPosition){
+//            rotationSetPoint=minRotationPosition;
+//        }
+        if(extensionSetPoint>maxExtensionPosition){
+            extensionSetPoint=maxExtensionPosition;
+        }
+        if(extensionSetPoint<minExtensionPosition){
+            extensionSetPoint=minExtensionPosition;
+        }
+//        rotation.setPower(rotationPower);
+        extension.setPower(extensionPower);
+        rotation.setPosition((int)rotationSetPoint,rotationPower);
+
+
 
 //        torque=-1*extensionLength*mass*gravity*java.lang.Math.cos(angle);
 //        extensionForce=-1*mass*gravity*java.lang.Math.sin(angle);
-
+        extension.update();
+        rotation.update();
 
 
     }
 
-    public void zeroRotation(){rotation.setPosition(rotationSetPoint,1);}
+    public void zeroRotation(){rotation.setPosition((int)rotationSetPoint,1);}
     public void endRotation(){rotationSetPoint=maxRotationPosition;}
     public void dumpRotation(){rotation.setPosition(dumpRotationPosition,1);}
 
-    public void controlRotation(double y){rotation.setPower(y);}
+    public void controlRotation(double y){rotationSetPoint=rotationSetPoint+(y*100);}
+//    public void controlRotation(double y){rotation.setPower(y);}
+//    public void controlExtension(double x){extension.setPower(x);}
+    public void controlExtension(double x){extensionSetPoint=extensionSetPoint+(x*100);}
 
     public void zeroExtension(){extension.setPosition(minExtensionPosition,1);}
     public void endExtension(){extension.setPosition(maxExtensionPosition,1);}
-    public void controlExtension(double x){extension.setPower(x);}
+
+
     public void dumpExtension(){extension.setPosition(dumpExtensionPosition,1);}
     public double getRotationEncoder(){return rotationEncoder;}
     public double getExtensionEncoder(){return extensionEncoder;}
