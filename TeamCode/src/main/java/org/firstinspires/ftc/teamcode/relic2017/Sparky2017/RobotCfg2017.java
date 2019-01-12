@@ -4,6 +4,7 @@ import android.util.Log;
 
 import com.google.common.collect.ImmutableList;
 import com.qualcomm.hardware.bosch.BNO055IMU;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
 import java.util.List;
@@ -46,6 +47,7 @@ import static evlib.vision.framegrabber.GlobalFrameGrabber.frameGrabber;
  * This file was made by the electronVolts, FTC team 7393
  * Date Created: 9/2/17
  */
+@Disabled
 
 public class RobotCfg2017 extends RobotCfg {
     private final MecanumControl mecanumControl;

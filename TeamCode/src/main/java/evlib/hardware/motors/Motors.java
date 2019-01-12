@@ -1,5 +1,7 @@
 package evlib.hardware.motors;
 
+import android.util.Log;
+
 import com.google.common.collect.ImmutableList;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -8,6 +10,7 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 
 import java.util.Collection;
 
+import evlib.util.StepTimer;
 import ftc.electronvolts.util.Function;
 import ftc.electronvolts.util.InputExtractor;
 import ftc.electronvolts.util.Utility;
@@ -430,9 +433,15 @@ public class Motors {
                 return mode;
             }
 
+            StepTimer t = new StepTimer("MotorRoot",Log.VERBOSE);
+
             @Override
             public void update() {
+                t.start();
+                t.step("motor_encoder_position");
                 encoderPosition = dcMotor.getCurrentPosition();
+
+                t.step("motor_setMode");
 
                 if (mode != lastMode) {
 
@@ -440,13 +449,18 @@ public class Motors {
                     lastMode = dcMotorRunModeToMotorMode(dcMotor.getMode());
                 }
 
+                t.step("motor_setTargetPosition");
+
                 if (mode == Mode.POSITION) {
                     dcMotor.setTargetPosition(encoderTarget);
                 }
+
+                t.step("motor_setPower");
                 if(power!=lastPower) {
                     lastPower=power;
                     dcMotor.setPower(Utility.motorLimit(power));
                 }
+                t.stop();
             }
         };
     }

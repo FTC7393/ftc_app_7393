@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.relic2017.Sparky2017;
 
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import java.util.Locale;
@@ -17,6 +18,8 @@ import evlib.opmodes.AbstractOptionsOp;
  * Created by ftc7393 on 12/6/2017.
  */
 @TeleOp(name = "OptionsOp")
+@Disabled
+
 public class OptionsOp extends AbstractOptionsOp {
     /**
      * The filename will be set by the subclasses

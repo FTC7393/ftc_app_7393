@@ -1,12 +1,14 @@
 package org.firstinspires.ftc.teamcode.RoverRuckus;
 
-import com.qualcomm.robotcore.hardware.ColorSensor;
+import android.util.Log;
 
-import evlib.hardware.motors.Motor;
 import evlib.hardware.motors.MotorEnc;
+import evlib.hardware.sensors.AnalogSensor;
 import evlib.hardware.sensors.DigitalSensor;
-import evlib.hardware.servos.ServoControl;
+import evlib.util.StepTimer;
 import ftc.electronvolts.util.DigitalInputEdgeDetector;
+import ftc.electronvolts.util.Function;
+import ftc.electronvolts.util.Functions;
 import ftc.electronvolts.util.PIDController;
 
 /**
@@ -22,58 +24,144 @@ public class Arm {
     double extensionForce;
     private MotorEnc extension;
     private MotorEnc rotation;
+    double a=5;
+    Function expo= Functions.eBased(a);
+    boolean isLocked=false;
 
 
-    private final DigitalInputEdgeDetector extensionLimit,rotationLimit;
+    private final DigitalInputEdgeDetector extensionLimit;
     private PIDController rotationPID;
     private PIDController extensionPID;
+    AnalogSensor potentiometer;
+
     private double rotationEncoder=0;
     private double extensionEncoder=0;
 
-    int maxRotationPosition =4696;
-    int dumpRotationPosition=600;
+    // Presets:
+    // Driver2 dpad UP: COLLECT ARM, Extend 1985
+    // Driver2 dpad DOWN: STOW ARM, Extend 0
+    // Driver2 left_bumper: SILVER DUMP, Extend 1596, Rotate 2.33
+    // Driver2 right_bumper: GOLD DUMP, Extend 1985, Rotate 2.47
 
-    int dumpExtensionPosition=600;
+    int maxRotationPosition =1000000;
+   // int dumpRotationPosition=600;
+
+    int dumpSilverExtensionPosition = 1596;
+    int dumpGoldExtensionPosition = 1985+204;
+    int collectExtensionPosition = 1985;
+    int stowExtensionPosition = 0;
+
     int maxExtensionPosition=2685;
-    int minRotationPosition=0;
-    int minExtensionPosition=0;
+    int minRotationPosition=-10000;
+    double rotationStartingPosition=1.1;
+    double potentiometerMinPosition=0.99;
+
+    double rotationVerticalPosition=4.85;
+    double rotationGoldPosition =2.47;
+    double rotationSilverPosition =2.33;
+    double potentiometerMaxPosition=3.02;
+
+    int minExtensionPosition=0;   // !!! Change this to -10000 when limit switch is reinstalled !!!
     double rotationSetPoint=0;
+    double rotationPotentiometerTarget=0;
+    boolean rotationPotentiometerControl=false;
     double rotationPower=0;
     double extensionSetPoint=0;
     double extensionPower=0;
+    double potentiometerValue;
+    double previousPotentiometerValue=1.29;
+
+    double rotationSetSpeed=0;
+
+    double rotationLockSetPoint=0;
 
 
-    public Arm(MotorEnc extension, DigitalSensor extensionLimit, MotorEnc rotation, DigitalSensor rotationLimit) {
+    public Arm(MotorEnc extension, DigitalSensor extensionLimit, MotorEnc rotation,AnalogSensor potentiometer) {
         this.extension = extension;
         this.extensionLimit= new DigitalInputEdgeDetector(extensionLimit);
         this.rotation = rotation;
-        this.rotationLimit= new DigitalInputEdgeDetector(rotationLimit);
 
         this.rotationPID=new PIDController(0.001,0.0002,.00006,1);
         this.extensionPID=new PIDController(0.003,0,0,1);
+        this.potentiometer=potentiometer;
 
     }
 
+    StepTimer t = new StepTimer("Arm", Log.VERBOSE);
+
     public void act() {
+        t.start();
+        t.step("update limit switches");
+
+        extensionLimit.update();
+
+        t.step("update encoders");
 
         rotationEncoder=rotation.getEncoderPosition();
         extensionEncoder=extension.getEncoderPosition();
-//        if( rotationLimit.isPressed()==true){
+
+        t.step("update potentiometer");
+        potentiometerValue=potentiometer.getValue();
+
+        //if(isLocked==true){
+        //    rotationSetPoint=rotationLockSetPoint;  // Always control to the point we were at when we pressed the lock button
+            //rotation.setPower(0);
+        //}
+        //else{
+//            rotationPower=rotationPID.computeCorrection(rotationSetPoint,rotationEncoder);
+         //   rotationPower=1;
+
+        t.step("rotation logic");
+
+        // Check if we are controlling to a preset
+        if(rotationPotentiometerControl) {
+            if(Math.abs(rotationPotentiometerTarget-potentiometerValue) > 0.05) {
+                controlRotation(-3.0 * (rotationPotentiometerTarget - potentiometerValue));
+            } else {
+                stopRotation();
+            }
+        }
+
+        // Check for the absolute rotation limits
+        if( potentiometerValue >= potentiometerMaxPosition &&
+                previousPotentiometerValue < potentiometerMaxPosition){
+            rotationSetPoint = (int)rotationEncoder;
+            maxRotationPosition = (int)rotationEncoder;
+
+        } else if(potentiometerValue <= potentiometerMinPosition  &&
+                previousPotentiometerValue > potentiometerMinPosition ) {
+            rotationSetPoint = (int) rotationEncoder;
+            minRotationPosition = (int) rotationEncoder;
+        }
+
+        if(rotationSetPoint > maxRotationPosition){
+            rotationSetPoint = maxRotationPosition;
+        } else if(rotationSetPoint < minRotationPosition) {
+            rotationSetPoint = minRotationPosition;
+        }
+        //}
+        previousPotentiometerValue=potentiometerValue;
+
+        t.step("set rotation");
+        rotation.setPosition((int)rotationSetPoint,1);
+        //rotation.setSpeed(rotationSetSpeed);
+
+
+//        if( rotationLimit.justPressed()==true){
 //            rotation.resetEncoder();
 //
 //        }
-//
-//        if( extensionLimit.isPressed()==true){
-//            extension.resetEncoder();
-//
-//        }
-        rotationPower=rotationPID.computeCorrection(rotationSetPoint,rotationEncoder);
-        extensionPower=extensionPID.computeCorrection(extensionSetPoint,extensionEncoder);
+        t.step("extention limit switch");
+        if( extensionLimit.justPressed()==true){
+            extension.resetEncoder();
+            //minExtensionPosition=(int)extensionEncoder;
+            minExtensionPosition=0;
+        }
+
+        t.step("extension logic");
 
 //        rotation.setSpeed(rotationPower);
-//        if(rotationSetPoint>maxRotationPosition){
-//            rotationSetPoint=maxRotationPosition;
-//        }
+
 //        if(rotationSetPoint<minRotationPosition){
 //            rotationSetPoint=minRotationPosition;
 //        }
@@ -83,35 +171,87 @@ public class Arm {
         if(extensionSetPoint<minExtensionPosition){
             extensionSetPoint=minExtensionPosition;
         }
-//        rotation.setPower(rotationPower);
+        extensionPower=extensionPID.computeCorrection(extensionSetPoint,extensionEncoder);
+
+        t.step("extension set power");
+        //        rotation.setPower(rotationPower);
         extension.setPower(extensionPower);
-        rotation.setPosition((int)rotationSetPoint,rotationPower);
 
 
-
+        t.step("arm updates");
 //        torque=-1*extensionLength*mass*gravity*java.lang.Math.cos(angle);
 //        extensionForce=-1*mass*gravity*java.lang.Math.sin(angle);
         extension.update();
         rotation.update();
-
+        t.stop();
 
     }
 
-    public void zeroRotation(){rotation.setPosition((int)rotationSetPoint,1);}
+    public void zeroRotation(){rotationSetPoint=minRotationPosition;}
     public void endRotation(){rotationSetPoint=maxRotationPosition;}
-    public void dumpRotation(){rotation.setPosition(dumpRotationPosition,1);}
+    public void dumpSilverRotation(){
+        rotationPotentiometerTarget = rotationSilverPosition;
+        rotationPotentiometerControl = true;
+    }
+    public void dumpGoldRotation(){
+        rotationPotentiometerTarget = rotationGoldPosition;
+        rotationPotentiometerControl = true;
+    }
 
-    public void controlRotation(double y){rotationSetPoint=rotationSetPoint+(y*100);}
-//    public void controlRotation(double y){rotation.setPower(y);}
+    public void controlRotation(double y){
+        rotationSetPoint = rotationSetPoint + 160*(expo.f(-y));
+        rotationPotentiometerControl = false;
+    }
+    public void stopRotation() {
+        rotationSetPoint = rotationEncoder;
+        rotationPotentiometerControl = false;
+    }
+
+    //public void controlRotation(double y) {
+    //    rotationSetPoint = rotation.getEncoderPosition() + 120*(expo.f(-y));
+    //}
+    //public void controlRotation(double y){rotationSetSpeed=0.25*(expo.f(-y));}
+
+
+    //    public void controlRotation(double y){rotation.setPower(y);}
 //    public void controlExtension(double x){extension.setPower(x);}
-    public void controlExtension(double x){extensionSetPoint=extensionSetPoint+(x*100);}
+    public void controlExtension(double x) {
+        extensionSetPoint=extensionSetPoint + 50*(expo.f(-x));
+    }
+    public void stopExtension() {
+        extensionSetPoint = extensionEncoder;
+    }
 
-    public void zeroExtension(){extension.setPosition(minExtensionPosition,1);}
-    public void endExtension(){extension.setPosition(maxExtensionPosition,1);}
-
-
-    public void dumpExtension(){extension.setPosition(dumpExtensionPosition,1);}
+    public void zeroExtension(){extensionSetPoint=minExtensionPosition;}
+    public void endExtension(){extensionSetPoint=maxExtensionPosition;}
+    public void dumpGoldExtension(){extensionSetPoint=dumpGoldExtensionPosition;}
+    public void dumpSilverExtension(){extensionSetPoint=dumpSilverExtensionPosition;}
+    public void collectExtension(){extensionSetPoint=collectExtensionPosition;}
+    public void stowExtension(){extensionSetPoint=stowExtensionPosition;}
     public double getRotationEncoder(){return rotationEncoder;}
     public double getExtensionEncoder(){return extensionEncoder;}
+    public double getMinRotationValue(){return minRotationPosition;}
+    public double getMinExtensionValue(){return minExtensionPosition;}
+
+
+    public double getRotationPower(){return rotationPower;}
+    public double getExtensionPower(){return extensionPower;}
+
+    public double getRotationSetPoint(){return rotationSetPoint;}
+    public double getExtensionSetPoint(){return extensionSetPoint;}
+    public double getExponential(){return a;}
+
+    public MotorEnc getRotationMotor() { return rotation; }
+    public double getPotentiometerValue(){return potentiometerValue;}
+//    public boolean getExtensionLimitSwitch(){return extensionLimit.isPressed();}
+//    public void lockRotation(){
+//        isLocked=true;
+//        rotationLock.goToPreset(RoverRuckusRobotCfg.rotationLockPresets.LOCKED);
+//        rotationLockSetPoint = rotationEncoder;  // Save the point we were at when we pressed the lock button62
+//    }
+//    public void unlockRotation(){isLocked=false;rotationLock.goToPreset(RoverRuckusRobotCfg.rotationLockPresets.UNLOCKED);}
+
+
+
 
 }

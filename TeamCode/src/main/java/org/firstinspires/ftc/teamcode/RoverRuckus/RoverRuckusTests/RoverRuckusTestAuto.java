@@ -29,7 +29,9 @@ public class RoverRuckusTestAuto extends AbstractOp<RoverRuckusRobotCfg> {
 
     private enum StateName {
         START,
+
         DETECT_GOLD,
+
 
         GOLD_ALIGN, COLOR_SENSOR_ALIGN, GOLD_POSITION, RELEASE_LATCH
 
@@ -80,10 +82,10 @@ public class RoverRuckusTestAuto extends AbstractOp<RoverRuckusRobotCfg> {
         }
 
         if(state==StateName.COLOR_SENSOR_ALIGN){
-            int redLeftColor=robotCfg.getLeftColorSensor().red();
-            int blueLeftColor=robotCfg.getLeftColorSensor().blue();
-            int redRightColor=robotCfg.getRightColorSensor().red();
-            int blueRightColor=robotCfg.getRightColorSensor().blue();
+            int redLeftColor=0;//robotCfg.getLeftColorSensor().red();
+            int blueLeftColor=0;//robotCfg.getLeftColorSensor().blue();
+            int redRightColor=0;//robotCfg.getRightColorSensor().red();
+            int blueRightColor=0;//robotCfg.getRightColorSensor().blue();
 
             if(blueLeftColor>=2&&redLeftColor>2){
 

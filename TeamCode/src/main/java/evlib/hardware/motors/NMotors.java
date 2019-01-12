@@ -1,9 +1,12 @@
 package evlib.hardware.motors;
 
+import android.util.Log;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import evlib.util.StepTimer;
 import ftc.electronvolts.util.Utility;
 import ftc.electronvolts.util.units.Velocity;
 
@@ -88,7 +91,9 @@ public class NMotors {
      *
      * @param values the powers/speeds to be scaled and then run
      */
+    //StepTimer t = new StepTimer("mecanum",Log.VERBOSE);
     public void runNormalized(List<Double> values) {
+        //t.start();
         if (values.size() != motors.size()) {
             throw new IllegalArgumentException("Argument 'values' must have the same length as the number of motors.");
         }
@@ -109,13 +114,18 @@ public class NMotors {
 
         scaleFactor = 1 / highest;
 
+       //step("NMotors_scaleFactor");
+
         //rescale the values by the highest value
         List<Double> valuesScaled = new ArrayList<>();
         for (double power : values) {
             valuesScaled.add(power * scaleFactor);
         }
+        //step("NMotors_ListValuesScaled");
 
         run(valuesScaled);
+        //t.step("NMotors_RunValuesScaled");
+        //t.stop();
     }
 
     /**
@@ -139,6 +149,7 @@ public class NMotors {
                 motors.get(i).setPower(value);
             }
             this.values[i] = value;
+            //t.step("NMotors_run_"+i);
         }
     }
 

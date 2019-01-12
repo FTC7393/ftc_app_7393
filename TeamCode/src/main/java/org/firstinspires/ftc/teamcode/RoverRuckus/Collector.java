@@ -19,16 +19,13 @@ public class Collector {
     private ServoControl door;
     private ColorSensor left;
     private ColorSensor right;
+//    public Collector(Motor collection, ServoControl door, ColorSensor left, ColorSensor right) {
 
-
-
-
-    public Collector( Motor collection, ServoControl door, ColorSensor left, ColorSensor right) {
-
+    public Collector(Motor collection, ServoControl door) {
         this.collection = collection;
         this.door = door;
-        this.left = left;
-        this.right = right;
+//        this.left = left;
+//        this.right = right;
 
     }
 
@@ -36,15 +33,9 @@ public class Collector {
 
         collection.update();
        ;
-
-
-
     }
-    public void forwardCollection(){collection.setPower(1);}
-    public void backwardCollection(){collection.setPower(-1);}
-    public void offCollection(){collection.setPower(0);}
+    public void collectionPower(double a){collection.setPower(a);}
     public void rightDoor(){door.goToPreset(RoverRuckusRobotCfg.doorPresets.RIGHT);}
     public void leftDoor(){door.goToPreset(RoverRuckusRobotCfg.doorPresets.LEFT);}
     public void closeDoor(){door.goToPreset(RoverRuckusRobotCfg.doorPresets.CLOSE);}
-
 }
