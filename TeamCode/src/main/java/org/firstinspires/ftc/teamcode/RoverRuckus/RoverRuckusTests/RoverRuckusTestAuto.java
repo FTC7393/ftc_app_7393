@@ -3,11 +3,10 @@ package org.firstinspires.ftc.teamcode.RoverRuckus.RoverRuckusTests;
 import com.disnodeteam.dogecv.detectors.roverrukus.SamplingOrderDetector;
 
 import org.firstinspires.ftc.teamcode.RoverRuckus.RoverRuckusRobotCfg;
-import org.firstinspires.ftc.teamcode.relic2017.Mechanisms.IMUGyro;
+import evlib.hardware.sensors.IMUGyro;
 import org.firstinspires.ftc.teamcode.softwareTests.GoldAlignExample;
 import org.firstinspires.ftc.teamcode.softwareTests.SamplingOrderExample;
 
-import evlib.hardware.control.RotationControl;
 import evlib.hardware.control.RotationControls;
 import evlib.hardware.control.TranslationControls;
 import evlib.opmodes.AbstractOp;

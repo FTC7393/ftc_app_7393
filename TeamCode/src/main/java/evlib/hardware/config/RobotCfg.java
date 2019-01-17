@@ -47,6 +47,9 @@ public abstract class RobotCfg {
         accelerometer = Sensors.accelerometer(phoneSensorManager, phoneAccelerometer);
 
         phonePowerManager = (PowerManager) phoneContext.getSystemService(Context.POWER_SERVICE);
+
+        // This keeps the phone from automatically turning off the screen, which would
+        // I think cause some things to go to sleep
         phoneWakeLock = phonePowerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "FTC_APP_WAKELOCK");
     }
 

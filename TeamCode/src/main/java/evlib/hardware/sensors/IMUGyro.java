@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.relic2017.Mechanisms;
+package evlib.hardware.sensors;
 
 import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.hardware.bosch.JustLoggingAccelerationIntegrator;
@@ -10,7 +10,6 @@ import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 
 import ftc.electronvolts.util.BasicResultReceiver;
 import ftc.electronvolts.util.ResultReceiver;
-import evlib.hardware.sensors.Gyro;
 
 /**
  * Created by ftc7393 on 12/9/2017.
@@ -24,10 +23,11 @@ public class IMUGyro implements Gyro {
 //    Orientation angles=new Orientation();
 //    Acceleration gravity;
 
-    final ResultReceiver<Double> angleReciever;
-    final ResultReceiver<Boolean> stopReciever;
+    private final ResultReceiver<Double> angleReceiver;
+    private final ResultReceiver<Boolean> stopReceiver;
+    private final ResultReceiver<Boolean> isCalibrated = new BasicResultReceiver<>();
 
-
+    private boolean isActive = false;
 
     public IMUGyro(final BNO055IMU imu) {
         this.imu = imu;
@@ -46,18 +46,26 @@ public class IMUGyro implements Gyro {
         // on a Core Device Interface Module, configured to be a sensor of type "AdaFruit IMU",
         // and named "imu".
 
-        angleReciever=new BasicResultReceiver<>();
-        stopReciever=new BasicResultReceiver<>();
+        angleReceiver = new BasicResultReceiver<>();
+        stopReceiver = new BasicResultReceiver<>();
 
-        angleReciever.setValue(0.0);
+        angleReceiver.setValue(0.0);
         new Thread(new Runnable() {
             @Override
             public void run() {
                 imu.initialize(parameters);
                 isCalibrated.setValue(true);
-                while(!stopReciever.isReady()){
-                    Orientation angles   = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
-                    angleReciever.setValue((double) -angles.firstAngle);
+                while (!stopReceiver.isReady()) {
+                    if (isActive) {
+                        Orientation angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
+                        angleReceiver.setValue((double) -angles.firstAngle);
+                    } else {
+                        try {
+                            Thread.sleep(20L, 0);
+                        } catch (InterruptedException e) {
+                            // do nothing
+                        }
+                    }
                 }
 
             }
@@ -71,16 +79,16 @@ public class IMUGyro implements Gyro {
 //
 //    }
 
-
-
-
-
+    @Override
+    public void setActive(boolean active) {
+        this.isActive = active;
+    }
 
     @Override
     public double getHeading() {
 
 
-        return angleReciever.getValue();
+        return angleReceiver.getValue();
     }
 
 //    @Override
@@ -97,12 +105,6 @@ public class IMUGyro implements Gyro {
 
     @Override
     public void stop() {
-        stopReciever.setValue(true);
+        stopReceiver.setValue(true);
     }
-
-    public ResultReceiver<Boolean> isCalibrated=new BasicResultReceiver<>();
-
-
-
-
 }

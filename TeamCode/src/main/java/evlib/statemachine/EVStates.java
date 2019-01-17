@@ -1525,6 +1525,7 @@ public class EVStates extends States {
             public void init() {
                 mecanumControl.setTranslationControl(TranslationControls.ZERO);
                 mecanumControl.setRotationControl(RotationControls.gyro(gyro, orientation, tolerance, speed));
+                gyro.setActive(true);
             }
 
             @Override
@@ -1535,6 +1536,7 @@ public class EVStates extends States {
             @Override
             public void dispose() {
                 mecanumControl.stop();
+                gyro.setActive(false);
             }
         };
     }

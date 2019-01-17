@@ -4,12 +4,7 @@ import android.util.Log;
 
 import com.google.common.collect.ImmutableList;
 import com.qualcomm.hardware.bosch.BNO055IMU;
-import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
-import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-import com.qualcomm.robotcore.hardware.Servo;
-
-import org.firstinspires.ftc.teamcode.relic2017.Mechanisms.IMUGyro;
 
 import java.util.List;
 import java.util.Map;
@@ -17,11 +12,10 @@ import java.util.Map;
 import evlib.hardware.config.RobotCfg;
 import evlib.hardware.control.MecanumControl;
 import evlib.hardware.motors.MecanumMotors;
-import evlib.hardware.motors.Motor;
 import evlib.hardware.motors.MotorEnc;
 import evlib.hardware.motors.Motors;
-import evlib.hardware.sensors.AnalogSensor;
 import evlib.hardware.sensors.Gyro;
+import evlib.hardware.sensors.IMUGyro;
 import evlib.hardware.sensors.Sensors;
 import evlib.hardware.servos.ServoCfg;
 import evlib.hardware.servos.ServoControl;
@@ -31,7 +25,6 @@ import evlib.statemachine.EVStateMachineBuilder;
 import evlib.util.StepTimer;
 import ftc.electronvolts.statemachine.StateName;
 import ftc.electronvolts.util.InputExtractor;
-import ftc.electronvolts.util.PIDController;
 import ftc.electronvolts.util.TeamColor;
 import ftc.electronvolts.util.files.Logger;
 import ftc.electronvolts.util.units.Angle;
@@ -249,7 +242,7 @@ public class RoverRuckusRobotCfg extends RobotCfg {
     //public ColorSensor getRightColorSensor() {
     //    return rightColorSensor;
     //}
-    public IMUGyro getGyro() {
+    public Gyro getGyro() {
         return gyro;
     }
 

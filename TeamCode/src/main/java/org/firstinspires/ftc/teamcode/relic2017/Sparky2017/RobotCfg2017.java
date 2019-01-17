@@ -26,7 +26,7 @@ import evlib.hardware.motors.MecanumMotors;
 import com.qualcomm.robotcore.hardware.ColorSensor;
 
 import org.firstinspires.ftc.teamcode.relic2017.Mechanisms.Grabber;
-import org.firstinspires.ftc.teamcode.relic2017.Mechanisms.IMUGyro;
+import evlib.hardware.sensors.IMUGyro;
 import org.firstinspires.ftc.teamcode.relic2017.Mechanisms.Relic;
 
 import evlib.hardware.motors.Motors;

@@ -10,4 +10,5 @@ public interface Gyro {
     boolean isCalibrating();
     void stop();
 
+    void setActive(boolean isActive);
 }
