@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode.RoverRuckus3DayBuild;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
@@ -12,7 +13,7 @@ import ftc.electronvolts.util.units.Time;
  * Created by ftc7393 on 9/8/2018.
  */
 @Autonomous(name = "Auto3DayBuild")
-
+@Disabled
 public class Auto3DayBuild extends AbstractOp<RobotCfg3DayBuild> {
     private StateName state = StateName.RELEASE_LATCH;
     private ElapsedTime runtime = new ElapsedTime();

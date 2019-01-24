@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode.relic2017.Sparky2017;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.io.BaseEncoding;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.exception.RobotCoreException;
 
@@ -23,6 +24,7 @@ import evlib.util.StepTimer;
  * Created by ftc7393 on 11/24/2017.
  */
 @TeleOp(name = "TeleOp2017")
+@Disabled
 public class TeleOp2017 extends AbstractTeleOp<RobotCfg2017> {
 
     /**

@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.relic2017;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 
 import org.firstinspires.ftc.teamcode.R;
 import org.firstinspires.ftc.teamcode.relic2017.Mechanisms.VuMarkFinder;
@@ -25,6 +26,7 @@ import evlib.vision.processors.Particles;
  * Date Created: 12/14/16
  */
 @Autonomous(name = "ParticleScanOp")
+@Disabled
 public class ParticleScanOp extends AbstractAutoOp<RobotCfg2017> {
 
     private static final int FRAME_SIZE = 16;

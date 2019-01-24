@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.RoverRuckus3DayBuild;
 
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import evlib.hardware.servos.ServoName;
@@ -11,7 +12,7 @@ import ftc.electronvolts.util.files.Logger;
  * Created by ftc7393 on 9/8/2018.
  */
 @TeleOp(name = "TeleOp3DayBuild")
-
+@Disabled
 public class TeleOp3DayBuild extends AbstractTeleOp<RobotCfg3DayBuild> {
     double left;
     double right;

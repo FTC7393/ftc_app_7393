@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.relic2017;
 
 import com.google.common.io.BaseEncoding;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.exception.RobotCoreException;
 
 import org.firstinspires.ftc.teamcode.relic2017.Sparky2017.TeleOp2017;
@@ -21,6 +22,7 @@ import evlib.util.FileUtil;
  * Date Created: 10/11/16
  */
 @Autonomous(name = "TeleOpPlayback")
+@Disabled
 public class TeleOpPlayback extends TeleOp2017 {
     public static final String GAMEPAD_1_TITLE = "gamepad1";
     public static final String GAMEPAD_2_TITLE = "gamepad2";

@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.kidFest2018;
 
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 
@@ -17,7 +18,7 @@ import ftc.electronvolts.util.units.Time;
  * Created by ftc7393 on 9/22/2018.
  */
 @TeleOp(name = "kidFest")
-
+@Disabled
 public class kidFestTeleOp extends AbstractTeleOp<kidFestRobotCfg> {
     private DcMotor dump = null;
     private DcMotor collector = null;

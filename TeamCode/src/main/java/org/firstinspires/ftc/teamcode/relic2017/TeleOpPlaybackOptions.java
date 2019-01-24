@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.relic2017;
 
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import java.io.File;
@@ -16,6 +17,7 @@ import evlib.util.FileUtil;
  * Date Created: 12/14/16
  */
 @TeleOp(name = "TeleOpPlaybackOptions")
+@Disabled
 public class TeleOpPlaybackOptions extends AbstractOptionsOp {
     public static final String FILENAME = "PlaybackOptions.txt";
     public static final String filepathTag = "filepath";

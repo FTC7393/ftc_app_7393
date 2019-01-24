@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.relic2017.Sparky2017;
 
 import com.google.common.collect.ImmutableList;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.hardware.ColorSensor;
 
 import ftc.electronvolts.statemachine.EndConditions;
@@ -35,7 +36,7 @@ import org.firstinspires.ftc.teamcode.relic2017.Mechanisms.VuMarkFinder;
  */
 //extends AbstractAutoOp<>
 @Autonomous(name = "NoGlyph")
-
+@Disabled
 public class AutoNoGlyph extends AbstractAutoOp<RobotCfg2017> {
     private enum S implements StateName{
 

@@ -19,6 +19,7 @@ import ftc.electronvolts.util.units.Time;
  * simple TeleOp for the fair robot which has 2 motors
  */
 @TeleOp(name = "Fair Robot TeleOp")
+@Disabled
 public class FairTeleOp2018 extends AbstractTeleOp<FairRobotCfg> {
 
     private DcMotor clam = null;
