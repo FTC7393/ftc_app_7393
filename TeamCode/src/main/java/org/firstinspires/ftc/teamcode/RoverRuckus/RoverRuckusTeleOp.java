@@ -88,7 +88,35 @@ public class RoverRuckusTeleOp extends AbstractTeleOp<RoverRuckusRobotCfg>{
 
                 return getRotationValue();
             }
-        })) .add(new Logger.Column("Extension Joystick", new InputExtractor<Double>() {
+        }))
+                .add(new Logger.Column("leftX", new InputExtractor<Double>() {
+                    @Override
+                    public Double getValue() {
+
+
+
+                        return driver1.left_stick_x.getValue();
+                    }
+                }))
+                .add(new Logger.Column("rightY", new InputExtractor<Double>() {
+                    @Override
+                    public Double getValue() {
+
+
+
+                        return driver1.right_stick_y.getValue();
+                    }
+                }))
+                .add(new Logger.Column("rightX", new InputExtractor<Double>() {
+                    @Override
+                    public Double getValue() {
+
+
+
+                        return driver1.right_stick_x.getValue();
+                    }
+                }))
+                .add(new Logger.Column("Extension Joystick", new InputExtractor<Double>() {
                     @Override
                     public Double getValue() {
 
@@ -111,9 +139,11 @@ public class RoverRuckusTeleOp extends AbstractTeleOp<RoverRuckusRobotCfg>{
     }
     private void forwardControl() {
         double f = currentSpeedFactor.getFactor();
+        //rightY and leftX are inversed only if the mecanum wheels are pointed out
         rightY = new ScalingInputExtractor(driver1.right_stick_y, f);
         leftX = new ScalingInputExtractor(driver1.left_stick_x, f);
-        rightX = new ScalingInputExtractor(InputExtractors.negative(driver1.right_stick_x), f);
+        // TODO: if mecanum wheels reversed, add InputExtractors.negative() on the driver1.right_stick_x
+        rightX = new ScalingInputExtractor(driver1.right_stick_x, f);
         //noinspection SuspiciousNameCombination
         robotCfg.getMecanumControl().setTranslationControl(TranslationControls.inputExtractorXY(rightY, rightX));
 //        robotCfg.getMecanumControl().setRotationControl(RotationControls.teleOpGyro(leftX, robotCfg.getGyro()));

@@ -59,7 +59,7 @@ import static evlib.vision.framegrabber.VuforiaFrameFeeder.beacons;
 /**
  * This file was made by the electronVolts, FTC team 7393
  * Date Created: 5/10/16
- *
+ * Change the mecanum drive and gyro turn to max angular speed
  * @see State
  * @see EVStateMachineBuilder
  */
@@ -944,14 +944,14 @@ public class EVStates extends States {
      * @see Distance
      */
     public static State mecanumDrive(final StateName nextStateName, final Distance distance, final MecanumControl mecanumControl, final Gyro gyro, final double velocity, final Angle direction, final Angle orientation, final Angle tolerance, final double maxAngularSpeed) {
-        return mecanumDrive(nextStateName, distance, mecanumControl,
+        return mecanumDrive(nextStateName, distance,gyro, mecanumControl,
                 RotationControls.gyro(gyro, orientation, tolerance, maxAngularSpeed),
                 TranslationControls.constant(velocity, direction)
         );
     }
 
     public static State mecanumDrive(final StateName nextStateName, final Distance distance, final MecanumControl mecanumControl, final Gyro gyro, Vector2D vector2D, final Angle orientation, final Angle tolerance, final double maxAngularSpeed) {
-        return mecanumDrive(nextStateName, distance, mecanumControl,
+        return mecanumDrive(nextStateName, distance,gyro, mecanumControl,
                 RotationControls.gyro(gyro, orientation, tolerance, maxAngularSpeed),
                 TranslationControls.constant(vector2D)
         );
@@ -961,7 +961,7 @@ public class EVStates extends States {
         return mecanumDrive(nextStateName, distance, mecanumControl, gyro, vector2D, orientation, tolerance, RotationControl.DEFAULT_MAX_ANGULAR_SPEED);
     }
 
-    public static State mecanumDrive(final StateName nextStateName, final Distance distance, final MecanumControl mecanumControl, final RotationControl rotationControl, final TranslationControl translationControl) {
+    public static State mecanumDrive(final StateName nextStateName, final Distance distance,final Gyro gyro, final MecanumControl mecanumControl, final RotationControl rotationControl, final TranslationControl translationControl) {
         mecanumControl.setDriveMode(MecanumMotors.MecanumDriveMode.NORMALIZED);
 //        double speedMetersPerMillisecond = mecanumControl.getMaxRobotSpeed(Angle.subtract(direction, orientation)).metersPerMillisecond() * velocity;
 //        double durationMillis = Math.abs(distance.meters() / speedMetersPerMillisecond);
@@ -979,6 +979,9 @@ public class EVStates extends States {
 //                timeEC.init();
 //                gyroEC.init();
                 mecanumControl.setControl(rotationControl, translationControl);
+                gyro.setActive(true);
+
+
             }
 
             @Override
@@ -1020,6 +1023,7 @@ public class EVStates extends States {
 
             @Override
             public StateName getNextStateName() {
+                gyro.setActive(false);
                 mecanumControl.stop();
                 return nextStateName;
             }
@@ -1510,11 +1514,13 @@ public class EVStates extends States {
 //        };}
 
 
-    public static State gyroTurn(StateName nextStateName, final MecanumControl mecanumControl, final Gyro gyro, final Angle orientation, final Angle tolerance) {
+    public static State gyroTurn(StateName nextStateName, final MecanumControl mecanumControl,
+                                 final Gyro gyro, final Angle orientation, final Angle tolerance) {
     return gyroTurn(nextStateName,mecanumControl,gyro,orientation,tolerance,1);
     }
 
-    public static State gyroTurn(StateName nextStateName, final MecanumControl mecanumControl, final Gyro gyro, final Angle orientation, final Angle tolerance,final double speed) {
+    public static State gyroTurn(StateName nextStateName, final MecanumControl mecanumControl,
+                                 final Gyro gyro, final Angle orientation, final Angle tolerance,final double speed) {
         Map<StateName, EndCondition> transitions = StateMap.of(
                 nextStateName,
                 EVEndConditions.gyroCloseTo(gyro, orientation, tolerance)

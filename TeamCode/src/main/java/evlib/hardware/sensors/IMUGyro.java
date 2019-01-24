@@ -50,7 +50,7 @@ public class IMUGyro implements Gyro {
         stopReceiver = new BasicResultReceiver<>();
 
         angleReceiver.setValue(0.0);
-        new Thread(new Runnable() {
+        Thread gyroReadThread = new Thread(new Runnable() {
             @Override
             public void run() {
                 imu.initialize(parameters);
@@ -58,7 +58,7 @@ public class IMUGyro implements Gyro {
                 while (!stopReceiver.isReady()) {
                     if (isActive) {
                         Orientation angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
-                        angleReceiver.setValue((double) -angles.firstAngle);
+                        angleReceiver.setValue((double) angles.firstAngle);
                     } else {
                         try {
                             Thread.sleep(20L, 0);
@@ -69,7 +69,8 @@ public class IMUGyro implements Gyro {
                 }
 
             }
-        }).start();
+        });
+        gyroReadThread.start();
 
 
     }

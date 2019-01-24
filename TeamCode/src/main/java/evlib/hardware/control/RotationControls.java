@@ -85,17 +85,16 @@ public class RotationControls {
      * @param maxAngularSpeed the max speed to rotate at
      * @return the created RotationControl
      */
-    public static evlib.hardware.control.RotationControl gyro(final Gyro gyro, final Angle targetHeading, /*final*/ Angle tolerance, final double maxAngularSpeed) {
+    public static evlib.hardware.control.RotationControl gyro(final Gyro gyro, final Angle targetHeading, final Angle tolerance, final double maxAngularSpeed) {
 //        OptionsFile optionsFile = new OptionsFile(EVConverters.getInstance(), FileUtil.getOptionsFile("AutoOptions.txt"));
 //        double gain = optionsFile.get("gyro_gain", Double.class);
 //        double max = optionsFile.get("gyro_max", Double.class);
 //        final ControlLoop gyroControl = new ProportionalController(gain, 0.01, 0.05, max);
 
-        tolerance = Angle.fromDegrees(1.0);
         double minAngularSpeed = 0.05;
         if (maxAngularSpeed < minAngularSpeed) minAngularSpeed = maxAngularSpeed;
         //                                                         gain,      innerDeadzone,                outerDeadzone,             minOutput,       maxOutput
-        final ControlLoop gyroControl = new ProportionalController(0.10, tolerance.abs().radians(), Angle.fromDegrees(20).radians(), minAngularSpeed, maxAngularSpeed);
+        final ControlLoop gyroControl = new ProportionalController(0.6, tolerance.abs().radians(), minAngularSpeed, maxAngularSpeed);
 
 //        final Vector2D targetHeadingVector = new Vector2D(1, Angle.multiply(targetHeading,-1));
         final Vector2D targetHeadingVector = new Vector2D(1, targetHeading);
@@ -111,7 +110,7 @@ public class RotationControls {
                 Vector2D gyroVector = new Vector2D(1, Angle.fromDegrees(gyroHeading));
 
                 //find the "signed angular separation", the magnitude and direction of the error
-                Angle signedAngularSeparation = Vector2D.signedAngularSeparation(targetHeadingVector, gyroVector);
+                Angle signedAngularSeparation = Vector2D.signedAngularSeparation(gyroVector,targetHeadingVector);
 //                telemetry.addData("signed angular separation", signedAngularSeparation.degrees());
 
 //              This graph shows angle error vs. rotation correction
@@ -128,7 +127,7 @@ public class RotationControls {
 //              The code inside ProportionalController creates this graph
 
                 //scale the signedAngularSeparation by a constant
-                rotationCorrection = -gyroControl.computeCorrection(0, signedAngularSeparation.radians());
+                rotationCorrection = gyroControl.computeCorrection(0, signedAngularSeparation.radians());
 //                telemetry.addData("rotationCorrection", rotationCorrection);
 
                 return true;

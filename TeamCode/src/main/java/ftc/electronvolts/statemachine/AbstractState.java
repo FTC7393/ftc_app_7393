@@ -18,7 +18,6 @@ public abstract class AbstractState implements State {
      * conditions and their respective next state names.
      *
      * @param transitions the map of EndCondition to NextState
-     * @see Transition
      */
     public AbstractState(Map<StateName, EndCondition> transitions) {
         this.transitions = transitions;

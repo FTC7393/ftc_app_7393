@@ -133,9 +133,11 @@ public class RoverRuckusAuto1 extends AbstractAutoOp<RoverRuckusRobotCfg> {
 //                return S.DRIVE_TO_DEPOT;
 //            }
 //        });
-        b.addDrive(S.DRIVE_TO_DEPOT,S.RELEASE_MARKER,Distance.fromFeet(2.4),.5,270,0);
+        b.addDrive(S.DRIVE_TO_DEPOT,S.RELEASE_MARKER,Distance.fromFeet(2.4),.5,90,0);
+        //b.addWait(S.WAIT,S.DRIVE_TO_DEPOT,500);
         b.addServo(S.RELEASE_MARKER,S.DRIVE_TO_CRATER,RoverRuckusRobotCfg.MainServoName.MARKER,RoverRuckusRobotCfg.markerPresets.RELEASE,true);
-        b.addDrive(S.DRIVE_TO_CRATER,S.STOP,Distance.fromFeet(8),.5,45,225);
+        //b.addWait(S.WAIT,S.DRIVE_TO_DEPOT,500);
+        b.addDrive(S.DRIVE_TO_CRATER,S.STOP,Distance.fromFeet(8),.5,225,45);
         // to go towards the other crater is 135 degrees; note - the gain on the gyro on the gyro control needs adjusting to keep it from
         b.addStop(S.STOP);
 

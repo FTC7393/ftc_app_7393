@@ -124,7 +124,7 @@ public class EVStateMachineBuilder extends StateMachineBuilder {
 
 
     public void addDrive(StateName stateName, StateName nextStateName, Distance distance, RotationControl rotationControl, TranslationControl translationControl) {
-        add(stateName, evlib.statemachine.EVStates.mecanumDrive(nextStateName, distance, mecanumControl, rotationControl, translationControl));
+        add(stateName, evlib.statemachine.EVStates.mecanumDrive(nextStateName, distance, gyro, mecanumControl, rotationControl, translationControl));
     }
 
     public void addDrive(StateName stateName, Map<StateName, EndCondition> transitions, RotationControl rotationControl, TranslationControl translationControl) {
@@ -132,7 +132,7 @@ public class EVStateMachineBuilder extends StateMachineBuilder {
     }
 
     public void addDrive(StateName stateName, StateName nextStateName, Distance distance, XYRControl xyrControl) {
-        add(stateName, evlib.statemachine.EVStates.mecanumDrive(nextStateName, distance, mecanumControl, xyrControl, xyrControl));
+        add(stateName, evlib.statemachine.EVStates.mecanumDrive(nextStateName, distance, gyro,mecanumControl, xyrControl, xyrControl));
     }
 
     public void addDrive(StateName stateName, Map<StateName, EndCondition> transitions, XYRControl xyrControl) {

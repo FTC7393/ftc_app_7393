@@ -24,7 +24,7 @@ public class Arm {
     double extensionForce;
     private MotorEnc extension;
     private MotorEnc rotation;
-    double a=5;
+    double a=1.5;
     Function expo= Functions.eBased(a);
     boolean isLocked=false;
 
@@ -59,9 +59,9 @@ public class Arm {
     double rotationVerticalPosition=4.85;
     double rotationGoldPosition =2.47;
     double rotationSilverPosition =2.33;
-    double potentiometerMaxPosition=3.02;
+    double potentiometerMaxPosition=2.70;
 
-    int minExtensionPosition=0;   // !!! Change this to -10000 when limit switch is reinstalled !!!
+    int minExtensionPosition=-10000;   // !!! Change this to -10000 when limit switch is reinstalled !!!
     double rotationSetPoint=0;
     double rotationPotentiometerTarget=0;
     boolean rotationPotentiometerControl=false;
@@ -116,7 +116,7 @@ public class Arm {
         // Check if we are controlling to a preset
         if(rotationPotentiometerControl) {
             if(Math.abs(rotationPotentiometerTarget-potentiometerValue) > 0.05) {
-                controlRotation(-3.0 * (rotationPotentiometerTarget - potentiometerValue));
+                controlRotationAuto(-1 * (rotationPotentiometerTarget - potentiometerValue));
             } else {
                 stopRotation();
             }
@@ -202,6 +202,11 @@ public class Arm {
         rotationSetPoint = rotationSetPoint + 160*(expo.f(-y));
         rotationPotentiometerControl = false;
     }
+
+    public void controlRotationAuto(double y) {
+        rotationSetPoint = rotationSetPoint + 140*(-y);
+    }
+
     public void stopRotation() {
         rotationSetPoint = rotationEncoder;
         rotationPotentiometerControl = false;

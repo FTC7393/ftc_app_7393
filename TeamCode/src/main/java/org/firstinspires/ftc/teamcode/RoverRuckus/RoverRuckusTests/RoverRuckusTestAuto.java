@@ -3,7 +3,6 @@ package org.firstinspires.ftc.teamcode.RoverRuckus.RoverRuckusTests;
 import com.disnodeteam.dogecv.detectors.roverrukus.SamplingOrderDetector;
 
 import org.firstinspires.ftc.teamcode.RoverRuckus.RoverRuckusRobotCfg;
-import evlib.hardware.sensors.IMUGyro;
 import org.firstinspires.ftc.teamcode.softwareTests.GoldAlignExample;
 import org.firstinspires.ftc.teamcode.softwareTests.SamplingOrderExample;
 
@@ -21,7 +20,6 @@ import ftc.electronvolts.util.units.Time;
 
 public class RoverRuckusTestAuto extends AbstractOp<RoverRuckusRobotCfg> {
     private StateName state = StateName.RELEASE_LATCH;
-    IMUGyro gyro =robotCfg.getGyro();
     Angle tolerance;
     Angle orientation;
 

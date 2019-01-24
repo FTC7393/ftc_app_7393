@@ -207,6 +207,9 @@ public class EVEndConditions extends EndConditions {
         return gyroCloseTo(gyro, Angle.fromDegrees(targetDegrees), tolerance);
     }
 
+    public static Double separationLog;
+    public static Double toleranceLog;
+
     /**
      * wait until the gyro heading is close to a target value
      *
@@ -226,7 +229,9 @@ public class EVEndConditions extends EndConditions {
             @Override
             public boolean isDone() {
                 Vector2D gyroVector = new Vector2D(1, Angle.fromDegrees(gyro.getHeading()));
-                Angle separation = Vector2D.signedAngularSeparation(targetVector, gyroVector);
+                Angle separation = Vector2D.signedAngularSeparation(gyroVector, targetVector);
+                separationLog=separation.radians();
+                toleranceLog=tolerance.radians();
                 return Math.abs(separation.radians()) <= tolerance.radians();
             }
         };

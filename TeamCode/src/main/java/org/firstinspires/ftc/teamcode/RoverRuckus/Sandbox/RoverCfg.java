@@ -14,6 +14,7 @@ import evlib.hardware.control.MecanumControl;
 import evlib.hardware.motors.MecanumMotors;
 import evlib.hardware.motors.MotorEnc;
 import evlib.hardware.motors.Motors;
+import evlib.statemachine.EVEndConditions;
 import ftc.electronvolts.util.InputExtractor;
 import ftc.electronvolts.util.files.Logger;
 import ftc.electronvolts.util.units.Distance;
@@ -65,9 +66,21 @@ public class RoverCfg extends RobotCfg {
                     public Double getValue() {
                         return mecanumControl.getMecanumMotors().getValue(0);
                     }
+                }),
+                new Logger.Column("Tolerance", new InputExtractor<Double>() {
+            @Override
+            public Double getValue() {
+                return EVEndConditions.toleranceLog ;
+            }
+        }  ),
+                new Logger.Column("Separation", new InputExtractor<Double>() {
+                    @Override
+                    public Double getValue() {
+                        return EVEndConditions.separationLog ;
+                    }
                 }
-                )
-        );
+
+        ));
 
     }
 
