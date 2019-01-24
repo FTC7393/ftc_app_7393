@@ -143,7 +143,7 @@ public class RoverRuckusTeleOp extends AbstractTeleOp<RoverRuckusRobotCfg>{
         rightY = new ScalingInputExtractor(driver1.right_stick_y, f);
         leftX = new ScalingInputExtractor(driver1.left_stick_x, f);
         // TODO: if mecanum wheels reversed, add InputExtractors.negative() on the driver1.right_stick_x
-        rightX = new ScalingInputExtractor(driver1.right_stick_x, f);
+        rightX = new ScalingInputExtractor(InputExtractors.negative(driver1.right_stick_x), f);
         //noinspection SuspiciousNameCombination
         robotCfg.getMecanumControl().setTranslationControl(TranslationControls.inputExtractorXY(rightY, rightX));
 //        robotCfg.getMecanumControl().setRotationControl(RotationControls.teleOpGyro(leftX, robotCfg.getGyro()));
@@ -364,10 +364,10 @@ public class RoverRuckusTeleOp extends AbstractTeleOp<RoverRuckusRobotCfg>{
         telemetry.addData("extensionEncoder",robotCfg.getArm().getExtensionEncoder());
         telemetry.addData("potentiomenterValue",robotCfg.getArm().getPotentiometerValue());
 
-        //telemetry.addData("frontLeft",robotCfg.frontLeft.getEncoderPosition());
-        //telemetry.addData("frontRight",robotCfg.frontRight.getEncoderPosition());
-        //telemetry.addData("backLeft",robotCfg.backLeft.getEncoderPosition());
-        //telemetry.addData("backRight",robotCfg.backRight.getEncoderPosition());
+//        telemetry.addData("frontLeft",robotCfg.frontLeft.getEncoderPosition());
+//        telemetry.addData("frontRight",robotCfg.frontRight.getEncoderPosition());
+//        telemetry.addData("backLeft",robotCfg.backLeft.getEncoderPosition());
+//        telemetry.addData("backRight",robotCfg.backRight.getEncoderPosition());
 
 
 

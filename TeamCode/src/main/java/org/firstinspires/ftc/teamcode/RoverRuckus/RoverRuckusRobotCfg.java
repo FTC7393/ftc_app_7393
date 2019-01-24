@@ -77,6 +77,7 @@ public class RoverRuckusRobotCfg extends RobotCfg {
         frontRight=   Motors.withEncoder(hardwareMap.dcMotor.get("frontRight") , false, true, stoppers);
         backLeft=     Motors.withEncoder(hardwareMap.dcMotor.get("backLeft") , true, true, stoppers);
         backRight=    Motors.withEncoder(hardwareMap.dcMotor.get("backRight") , false, true, stoppers);
+//        backRight=    Motors.scale(Motors.withEncoder(hardwareMap.dcMotor.get("backRight") , false, true, stoppers), 0.7);
 
         gyro = new IMUGyro(hardwareMap.get(BNO055IMU.class, "imu"));
         mecanumControl = new MecanumControl(new MecanumMotors(

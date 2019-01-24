@@ -548,7 +548,7 @@ public class Motors {
      * @param scale    the scaling factor
      * @return the created MotorEnc
      */
-    public static evlib.hardware.motors.Motor scale(final MotorEnc motorEnc, final double scale) {
+    public static evlib.hardware.motors.MotorEnc scale(final MotorEnc motorEnc, final double scale) {
         return new MotorEnc() {
             @Override
             public void setSpeed(double speed) {
