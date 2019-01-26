@@ -61,6 +61,11 @@ public class RoverRuckusRobotCfg extends RobotCfg {
     private IMUGyro gyro;
     private final Servos servos;
     ServoControl backFoot;
+
+    public MotorEnc getTestMotor() {
+        return backLeft;
+    }
+
     public RoverRuckusRobotCfg(HardwareMap hardwareMap, Map<ServoName, Enum> servoStartPresetMap) {
         super(hardwareMap);
         double scaleFactor = 1.0;
@@ -73,10 +78,10 @@ public class RoverRuckusRobotCfg extends RobotCfg {
 
         //leftColorSensor = hardwareMap.colorSensor.get(LEFT_COLOR_SENSOR_NAME);
         //rightColorSensor = hardwareMap.colorSensor.get(RIGHT_COLOR_SENSOR_NAME);
-        frontLeft=    Motors.withEncoder(hardwareMap.dcMotor.get("frontLeft"), true, true, stoppers);
-        frontRight=   Motors.withEncoder(hardwareMap.dcMotor.get("frontRight") , false, true, stoppers);
-        backLeft=     Motors.withEncoder(hardwareMap.dcMotor.get("backLeft") , true, true, stoppers);
-        backRight=    Motors.withEncoder(hardwareMap.dcMotor.get("backRight") , false, true, stoppers);
+        frontLeft=    Motors.withEncoder(hardwareMap.dcMotor.get("frontLeft"), false, true, stoppers);
+        frontRight=   Motors.withEncoder(hardwareMap.dcMotor.get("frontRight") , true, true, stoppers);
+        backLeft=     Motors.withEncoder(hardwareMap.dcMotor.get("backLeft") , false, true, stoppers);
+        backRight=    Motors.withEncoder(hardwareMap.dcMotor.get("backRight") , true, true, stoppers);
 //        backRight=    Motors.scale(Motors.withEncoder(hardwareMap.dcMotor.get("backRight") , false, true, stoppers), 0.7);
 
         gyro = new IMUGyro(hardwareMap.get(BNO055IMU.class, "imu"));
@@ -259,6 +264,12 @@ public class RoverRuckusRobotCfg extends RobotCfg {
         myTimer.start();
         myTimer.step("mecanumControl.act");
         mecanumControl.act();
+        // when testing the motors, uncomment these (and comment out mecanum.act()
+//        frontLeft.update();
+//        frontRight.update();
+//        backLeft.update();
+//        backRight.update();
+
         myTimer.step("arm.act");
         arm.act();
         myTimer.step("collector.act");

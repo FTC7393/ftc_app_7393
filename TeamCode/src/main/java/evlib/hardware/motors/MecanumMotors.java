@@ -106,10 +106,10 @@ public class MecanumMotors extends evlib.hardware.motors.FourMotors {
     private void mecanumDriveNormalized() {
         //calculate motor powers
         runMotorsNormalized(
-                velocityX + velocityY - velocityR,
-                velocityX - velocityY + velocityR,
                 velocityX - velocityY - velocityR,
-                velocityX + velocityY + velocityR
+                velocityX + velocityY + velocityR,
+                velocityX + velocityY - velocityR,
+                velocityX - velocityY + velocityR
         );
     }
 
@@ -119,10 +119,10 @@ public class MecanumMotors extends evlib.hardware.motors.FourMotors {
     private void mecanumDriveTranslationNormalized() {
         //calculate motor powers
         List<Double> translationValues = ImmutableList.of(
+                velocityX - velocityY,
                 velocityX + velocityY,
-                velocityX - velocityY,
-                velocityX - velocityY,
-                velocityX + velocityY);
+                velocityX + velocityY,
+                velocityX - velocityY);
 
         List<Double> rotationValues = ImmutableList.of(
                 -velocityR,

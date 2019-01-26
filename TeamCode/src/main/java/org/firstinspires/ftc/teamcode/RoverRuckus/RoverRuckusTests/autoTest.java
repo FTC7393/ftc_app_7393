@@ -26,7 +26,7 @@ import ftc.electronvolts.util.units.Distance;
 import ftc.electronvolts.util.units.Time;
 @Autonomous(name = "RoverRuckusTestingAutoOp")
 
-public class autoTest extends AbstractAutoOp<RoverRuckusRobotCfg> {
+public class AutoTest extends AbstractAutoOp<RoverRuckusRobotCfg> {
     Gyro gyro;
     MecanumControl mecanumControl;
 

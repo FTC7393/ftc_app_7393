@@ -140,8 +140,8 @@ public class RoverRuckusTeleOp extends AbstractTeleOp<RoverRuckusRobotCfg>{
     private void forwardControl() {
         double f = currentSpeedFactor.getFactor();
         //rightY and leftX are inversed only if the mecanum wheels are pointed out
-        rightY = new ScalingInputExtractor(driver1.right_stick_y, f);
-        leftX = new ScalingInputExtractor(driver1.left_stick_x, f);
+        rightY = new ScalingInputExtractor(InputExtractors.negative(driver1.right_stick_y), f);
+        leftX = new ScalingInputExtractor(InputExtractors.negative(driver1.left_stick_x), f);
         // TODO: if mecanum wheels reversed, add InputExtractors.negative() on the driver1.right_stick_x
         rightX = new ScalingInputExtractor(InputExtractors.negative(driver1.right_stick_x), f);
         //noinspection SuspiciousNameCombination

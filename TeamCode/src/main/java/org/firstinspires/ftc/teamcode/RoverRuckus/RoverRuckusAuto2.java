@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.RoverRuckus;
 
+
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
@@ -19,9 +20,9 @@ import ftc.electronvolts.util.files.Logger;
 import ftc.electronvolts.util.units.Angle;
 import ftc.electronvolts.util.units.Distance;
 import ftc.electronvolts.util.units.Time;
-@Autonomous(name = "RoverRuckusAutoOp")
+@Autonomous(name = "RoverRuckusAutoOp2")
 
-public class RoverRuckusAuto1 extends AbstractAutoOp<RoverRuckusRobotCfg> {
+public class RoverRuckusAuto2 extends AbstractAutoOp<RoverRuckusRobotCfg> {
     Gyro gyro;
     MecanumControl mecanumControl;
 
@@ -79,18 +80,18 @@ public class RoverRuckusAuto1 extends AbstractAutoOp<RoverRuckusRobotCfg> {
             @Override
             public boolean isDone() {
                 boolean doneHanging=false;
-                    if (!robotCfg.getHanging().islatchLimitPressed()&&runtime.seconds() < 6.0) {
+                if (!robotCfg.getHanging().islatchLimitPressed()&&runtime.seconds() < 6.0) {
 //                        robotCfg.getMecanumControl().setRotationControl(RotationControls.ZERO);
 //                        robotCfg.getMecanumControl().setTranslationControl(TranslationControls.constant(.2, Angle.fromDegrees(270)));
 
-                        robotCfg.getHanging().upHanging();
-                    } else {
-                        robotCfg.getHanging().stopHanging();
+                    robotCfg.getHanging().upHanging();
+                } else {
+                    robotCfg.getHanging().stopHanging();
 //                        robotCfg.getMecanumControl().setRotationControl(RotationControls.ZERO);
 //                        robotCfg.getMecanumControl().setTranslationControl(TranslationControls.ZERO);
-                        doneHanging=true;
+                    doneHanging=true;
 
-                    }
+                }
 
 
                 return doneHanging;
@@ -137,19 +138,9 @@ public class RoverRuckusAuto1 extends AbstractAutoOp<RoverRuckusRobotCfg> {
 //            }
 //        });
         b.addDrive(S.DRIVE_TO_DEPOT,S.TURN_CRATER,Distance.fromFeet(.4),.5,270,0 );
-        b.addGyroTurn(S.TURN_CRATER,S.DRIVE_TO_DEPOT_MORE,-90,.5);
-        b.addDrive(S.DRIVE_TO_DEPOT_MORE,S.TURN_CRATER_AGAIN,Distance.fromFeet(4.5),.5,270,-90);
+        b.addGyroTurn(S.TURN_CRATER,S.DRIVE_TO_DEPOT_MORE,-45,.5);
+        b.addDrive(S.DRIVE_TO_DEPOT_MORE,S.STOP,Distance.fromFeet(2),.5,270,-45);
 
-        b.addGyroTurn(S.TURN_CRATER_AGAIN,S.MOVE_LITTLE,-45,.5);
-
-        //b.addWait(S.WAIT,S.DRIVE_TO_DEPOT,500);
-        b.addDrive(S.MOVE_LITTLE,S.RELEASE_MARKER,Distance.fromInches(9),.5,-135,-45);
-        b.addServo(S.RELEASE_MARKER,S.WAIT_MARKER,RoverRuckusRobotCfg.MainServoName.MARKER,RoverRuckusRobotCfg.markerPresets.RELEASE,true);
-        b.addWait(S.WAIT_MARKER,S.DRIVE_TO_CRATER,Time.fromSeconds(.5));
-
-        //b.addWait(S.WAIT,S.DRIVE_TO_DEPOT,500);
-        b.addDrive(S.DRIVE_TO_CRATER,S.STOP,Distance.fromFeet(8.2),.5,135,-45);
-        // to go towards the other crater is 135 degrees; note - the gain on the gyro on the gyro control needs adjusting to keep it from
         b.addStop(S.STOP);
 
         return b.build();
@@ -179,3 +170,4 @@ public class RoverRuckusAuto1 extends AbstractAutoOp<RoverRuckusRobotCfg> {
 
     }
 }
+

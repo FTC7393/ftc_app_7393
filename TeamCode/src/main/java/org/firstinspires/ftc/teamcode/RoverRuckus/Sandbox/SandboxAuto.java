@@ -3,6 +3,8 @@ package org.firstinspires.ftc.teamcode.RoverRuckus.Sandbox;
 import com.google.common.collect.ImmutableList;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 
+import org.firstinspires.ftc.teamcode.RoverRuckus.RoverRuckusRobotCfg;
+
 import java.util.List;
 
 import evlib.opmodes.AbstractAutoOp;
@@ -17,33 +19,40 @@ import ftc.electronvolts.util.TeamColor;
 import ftc.electronvolts.util.files.Logger;
 import ftc.electronvolts.util.units.Angle;
 import ftc.electronvolts.util.units.Distance;
+import ftc.electronvolts.util.units.Time;
 
 @Autonomous(name = "Sandbox Auto")
-public class SandboxAuto extends AbstractAutoOp<RoverCfg> {
+public class SandboxAuto extends AbstractAutoOp<RoverRuckusRobotCfg> {
 
     enum S implements StateName {
         DRIVE1,
         TURN1,
 //        DRIVE2,
+        M_ON,
+        WAIT5,
         STOP;
     }
 
     @Override
     public StateMachine buildStates() {
         FrameGrabber fg = null;
-        EVStateMachineBuilder b = new EVStateMachineBuilder(S.TURN1, TeamColor.RED, Angle.fromRadians(0.05),
+        EVStateMachineBuilder b = new EVStateMachineBuilder(S.DRIVE1, TeamColor.RED, Angle.fromRadians(0.05),
                 robotCfg.getGyro(), fg, servos, robotCfg.getMecanumControl());
         Distance dist;
-        b.addDrive(S.DRIVE1, S.TURN1, Distance.fromFeet(3), 0.75, Angle.fromDegrees(0), Angle.fromDegrees(0));
+        b.addDrive(S.DRIVE1, S.TURN1, Distance.fromFeet(3), 0.75, Angle.fromDegrees(90), Angle.fromDegrees(0));
         b.addGyroTurn(S.TURN1, S.STOP, 90,.1);
 //        b.addDrive(S.DRIVE2, S.STOP, Distance.fromFeet(4), 0.35, Angle.fromDegrees(180), Angle.fromDegrees(180));
+
+        b.addMotorOn(S.M_ON, S.STOP, robotCfg.getTestMotor(), 0.8);
+        b.addWait(S.WAIT5, S.STOP, Time.fromSeconds(5));
+
         b.addStop(S.STOP);
         return b.build();
     }
 
     @Override
-    protected RoverCfg createRobotCfg() {
-        return new RoverCfg(hardwareMap);
+    protected RoverRuckusRobotCfg createRobotCfg() {
+        return new RoverRuckusRobotCfg(hardwareMap);
     }
 
     @Override

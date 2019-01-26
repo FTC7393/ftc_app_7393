@@ -60,6 +60,8 @@ public class Arm {
     double rotationGoldPosition =2.47;
     double rotationSilverPosition =2.33;
     double potentiometerMaxPosition=2.70;
+    double rotationFastZoneMin=1.3;
+    double rotationFastZoneMax=2.0;
 
     int minExtensionPosition=-10000;   // !!! Change this to -10000 when limit switch is reinstalled !!!
     double rotationSetPoint=0;
@@ -199,12 +201,21 @@ public class Arm {
     }
 
     public void controlRotation(double y){
-        rotationSetPoint = rotationSetPoint + 160*(expo.f(-y));
+        if(potentiometerValue > rotationFastZoneMin && potentiometerValue < rotationFastZoneMax) {
+            rotationSetPoint = rotationSetPoint + 80 * (expo.f(-y));
+        } else {
+            rotationSetPoint = rotationSetPoint + 50*(expo.f(-y));
+        }
         rotationPotentiometerControl = false;
     }
 
     public void controlRotationAuto(double y) {
-        rotationSetPoint = rotationSetPoint + 140*(-y);
+        if(potentiometerValue > rotationFastZoneMin && potentiometerValue < rotationFastZoneMax) {
+            rotationSetPoint = rotationSetPoint + 80*(-y);
+        } else {
+            rotationSetPoint = rotationSetPoint + 65*(-y);
+        }
+
     }
 
     public void stopRotation() {
