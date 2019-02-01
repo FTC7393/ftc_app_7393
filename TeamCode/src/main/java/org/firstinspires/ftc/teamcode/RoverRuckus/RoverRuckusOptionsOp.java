@@ -18,8 +18,6 @@ import evlib.opmodes.AbstractOptionsOp;
  * Created by ftc7393 on 12/6/2017.
  */
 @TeleOp(name = "OptionsOp")
-@Disabled
-
 public class RoverRuckusOptionsOp extends AbstractOptionsOp {
     /**
      * The filename will be set by the subclasses
@@ -32,24 +30,25 @@ public class RoverRuckusOptionsOp extends AbstractOptionsOp {
 
 
 
-    public static final String FILENAME = "teleop_options.txt";
+    public static final String FILENAME = "options_rover_ruckus.txt";
 
-    public static final String teamColorTag = "teamColor";
+//    public static final String teamColorTag = "teamColor";
     public static final String isStartingDepot="isStartingDepot";
+    public static final String doCameraSampling="doCameraSampling";
     public static final String moveToOpponentCrater="moveToOpponentCrater";
 
-    public static final TeamColor teamColorDefault = TeamColor.RED;
+//    public static final TeamColor teamColorDefault = TeamColor.RED;
     public static final boolean isStartingDepotDefault=false;
     public static final boolean moveToOpponentCraterDefault=true;
+    public static final boolean doCameraSamplingDefault=true;
 
 
+//    public static final String slowSpeedFraction = "slowSpeedFraction";
+//    private static final double slowSpeedFractionDefault = 0.5;
+//    public static final String fastSpeedFraction = "fastSpeedFraction";
+//    private static final double fastSpeedFractionDefault = 1;
 
-    public static final String slowSpeedFraction = "slowSpeedFraction";
-    private static final double slowSpeedFractionDefault = 0.5;
-    public static final String fastSpeedFraction = "fastSpeedFraction";
-    private static final double fastSpeedFractionDefault = 1;
-
-    private DigitalInputEdgeDetector driver1_left_stick_y_up, driver1_left_stick_y_down;
+//    private DigitalInputEdgeDetector driver1_left_stick_y_up, driver1_left_stick_y_down;
 
     public RoverRuckusOptionsOp() {
         super(FILENAME);
@@ -58,67 +57,86 @@ public class RoverRuckusOptionsOp extends AbstractOptionsOp {
     @Override
     protected void go() {
         super.go();
-        driver1_left_stick_y_up = new DigitalInputEdgeDetector(new InputExtractor<Boolean>() {
-            @Override
-            public Boolean getValue() {
-                return driver1.left_stick_y.getValue() <= -0.5;
-            }
-        });
-        driver1_left_stick_y_down = new DigitalInputEdgeDetector(new InputExtractor<Boolean>() {
-            @Override
-            public Boolean getValue() {
-                return driver1.left_stick_y.getValue() >= 0.5;
-            }
-        });
+//        driver1_left_stick_y_up = new DigitalInputEdgeDetector(new InputExtractor<Boolean>() {
+//            @Override
+//            public Boolean getValue() {
+//                return driver1.left_stick_y.getValue() <= -0.5;
+//            }
+//        });
+//        driver1_left_stick_y_down = new DigitalInputEdgeDetector(new InputExtractor<Boolean>() {
+//            @Override
+//            public Boolean getValue() {
+//                return driver1.left_stick_y.getValue() >= 0.5;
+//            }
+//        });
     }
 
     @Override
     protected void act() {
-        driver1_left_stick_y_up.update();
-        driver1_left_stick_y_down.update();
+//        driver1_left_stick_y_up.update();
+//        driver1_left_stick_y_down.update();
         //use gamepad to change options
-
-        if (driver1.b.justPressed()) {
-            optionsFile.set(teamColorTag, TeamColor.RED);
-        }
-        if (driver1.x.justPressed()) {
-            optionsFile.set(teamColorTag, TeamColor.BLUE);
-        }
-        telemetry.addData("*1 red/blue button => " + teamColorTag, optionsFile.get(teamColorTag, TeamColor.UNKNOWN));
-        if(driver1.a.justPressed()){
+//
+//        if (driver1.b.justPressed()) {
+//            optionsFile.set(teamColorTag, TeamColor.RED);
+//        }
+//        if (driver1.x.justPressed()) {
+//            optionsFile.set(teamColorTag, TeamColor.BLUE);
+//        }
+//        telemetry.addData("*1 red/blue button => " + teamColorTag, optionsFile.get(teamColorTag, TeamColor.UNKNOWN));
+        if(driver1.dpad_right.justPressed()){
             optionsFile.set(isStartingDepot,true);
         }
-        if(driver1.y.justPressed()){
+        if(driver1.dpad_left.justPressed()){
             optionsFile.set(isStartingDepot,false);
         }
-        telemetry.addData("y=false,a=true " + isStartingDepot, optionsFile.get(isStartingDepot, Boolean.class,null));
+        telemetry.addData("dLeft=false,dRight=true " + isStartingDepot, optionsFile.get(isStartingDepot, Boolean.class,null));
 
 
-        double slowSpeedFrac = optionsFile.get(slowSpeedFraction, slowSpeedFractionDefault);
-        if (driver1.dpad_up.justPressed()) {
-            slowSpeedFrac += .05;
+        if(driver1.right_bumper.justPressed()){
+            optionsFile.set(moveToOpponentCrater,true);
         }
-
-        if (driver1.dpad_down.justPressed()) {
-            slowSpeedFrac -= .05;
+        if(driver1.left_bumper.justPressed()){
+            optionsFile.set(moveToOpponentCrater,false);
         }
-        slowSpeedFrac = Utility.limit(slowSpeedFrac, 0.05, 1.0);
-
-        optionsFile.set(slowSpeedFraction, slowSpeedFrac);
-        telemetry.addData("*1 dpad up/down => " + slowSpeedFraction, String.format(Locale.ENGLISH, "%4.2f", slowSpeedFrac));
+        telemetry.addData("lb=false,rb=true " + moveToOpponentCrater, optionsFile.get(moveToOpponentCrater, Boolean.class,null));
 
 
-        double fastSpeedFrac = optionsFile.get(fastSpeedFraction, fastSpeedFractionDefault);
-        if (driver1.dpad_left.justPressed()) {
-            fastSpeedFrac += .05;
+        if(driver1.x.justPressed()){
+            optionsFile.set(doCameraSampling,true);
         }
-
-        if (driver1.dpad_right.justPressed()) {
-            fastSpeedFrac -= .05;
+        if(driver1.y.justPressed()){
+            optionsFile.set(doCameraSampling,false);
         }
-        fastSpeedFrac = Utility.limit(fastSpeedFrac, 0.05, 1.0);
-        optionsFile.set(slowSpeedFraction, fastSpeedFrac);
-        telemetry.addData("*1 dpad lift/right => " + fastSpeedFrac, String.format(Locale.ENGLISH, "%4.2f", fastSpeedFrac));
+        telemetry.addData("y=false,x=true " + doCameraSampling, optionsFile.get(doCameraSampling, Boolean.class,null));
+
+
+//
+//        double slowSpeedFrac = optionsFile.get(slowSpeedFraction, slowSpeedFractionDefault);
+//        if (driver1.dpad_up.justPressed()) {
+//            slowSpeedFrac += .05;
+//        }
+//
+//        if (driver1.dpad_down.justPressed()) {
+//            slowSpeedFrac -= .05;
+//        }
+//        slowSpeedFrac = Utility.limit(slowSpeedFrac, 0.05, 1.0);
+//
+//        optionsFile.set(slowSpeedFraction, slowSpeedFrac);
+//        telemetry.addData("*1 dpad up/down => " + slowSpeedFraction, String.format(Locale.ENGLISH, "%4.2f", slowSpeedFrac));
+//
+//
+//        double fastSpeedFrac = optionsFile.get(fastSpeedFraction, fastSpeedFractionDefault);
+//        if (driver1.dpad_left.justPressed()) {
+//            fastSpeedFrac += .05;
+//        }
+//
+//        if (driver1.dpad_right.justPressed()) {
+//            fastSpeedFrac -= .05;
+//        }
+//        fastSpeedFrac = Utility.limit(fastSpeedFrac, 0.05, 1.0);
+//        optionsFile.set(slowSpeedFraction, fastSpeedFrac);
+//        telemetry.addData("*1 dpad lift/right => " + fastSpeedFrac, String.format(Locale.ENGLISH, "%4.2f", fastSpeedFrac));
 //
 //
 //        double collectDistanceInches = optionsFile.get(collectDistanceInchesTag, collectDistanceDefault);

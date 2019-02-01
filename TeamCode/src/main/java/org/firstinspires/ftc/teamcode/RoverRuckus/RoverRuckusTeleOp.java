@@ -260,10 +260,10 @@ public class RoverRuckusTeleOp extends AbstractTeleOp<RoverRuckusRobotCfg>{
                 backFootState = 0;  // Commanded to go to locked (starting) position
         }
         else if(driver1.x.justPressed() || driver2.x.justPressed()) {
-            if (backFootState == 0 || backFootState == 2) {
-                backFootState = 1;  // Opened (above ground)
-            } else if (backFootState == 1) {
-                backFootState = 2;  // Deployed (touching ground)
+            if (backFootState == 0 || backFootState == 1) {
+                backFootState = 2;  // Opened (above ground)
+            } else if (backFootState == 2) {
+                backFootState = 1;  // Deployed (touching ground)
             }
         }
         if(robotCfg.getArm().getPotentiometerValue() > 1.7) {
