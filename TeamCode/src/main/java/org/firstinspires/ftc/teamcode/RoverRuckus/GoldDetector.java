@@ -1,12 +1,9 @@
 package org.firstinspires.ftc.teamcode.RoverRuckus;
 
-import android.graphics.Rect;
-
 import com.google.common.collect.ImmutableList;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.tfod.Recognition;
-import org.firstinspires.ftc.teamcode.RoverRuckus.RoverRuckusTests.TensorFlowObjectDetection;
 
 import java.util.List;
 

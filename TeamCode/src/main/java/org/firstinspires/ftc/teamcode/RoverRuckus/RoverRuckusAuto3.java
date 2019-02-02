@@ -3,16 +3,9 @@ package org.firstinspires.ftc.teamcode.RoverRuckus;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
-import org.firstinspires.ftc.teamcode.RoverRuckus.RoverRuckusTests.TensorFlowObjectDetection;
-import org.firstinspires.ftc.teamcode.relic2017.Mechanisms.VuMarkFinder;
-
-import evlib.hardware.config.RobotCfg;
 import evlib.hardware.control.MecanumControl;
-import evlib.hardware.control.RotationControls;
-import evlib.hardware.control.TranslationControls;
 import evlib.hardware.sensors.Gyro;
 import evlib.opmodes.AbstractAutoOp;
-import evlib.opmodes.AbstractOp;
 import evlib.statemachine.EVStateMachineBuilder;
 import ftc.electronvolts.statemachine.BasicAbstractState;
 import ftc.electronvolts.statemachine.EndCondition;
