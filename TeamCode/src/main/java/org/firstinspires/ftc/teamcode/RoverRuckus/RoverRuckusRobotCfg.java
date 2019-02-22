@@ -45,11 +45,13 @@ public class RoverRuckusRobotCfg extends RobotCfg {
     private final Collector collector;
     private final Hanging hanging;
     private final ServoControl marker;
+    private final ServoControl phonePan;
     final MotorEnc frontLeft;
     final MotorEnc frontRight;
     final MotorEnc backLeft;
     final MotorEnc backRight;
-    ServoControl Door;
+    private final ServoControl doorRight;
+    private final ServoControl doorLeft;
 
 
     //    private final Collector collector;
@@ -71,8 +73,10 @@ public class RoverRuckusRobotCfg extends RobotCfg {
         double scaleFactor = 1.0;
 
         servos = new Servos(ServoCfg.createServoMap(hardwareMap, servoStartPresetMap));
-        Door =   getServo(MainServoName.DOOR);
+        doorRight =   getServo(MainServoName.DOORRIGHT);
+        doorLeft =   getServo(MainServoName.DOORLEFT);
         marker = getServo(MainServoName.MARKER);
+        phonePan=getServo(MainServoName.PHONEPAN);
 
 
 
@@ -99,8 +103,8 @@ public class RoverRuckusRobotCfg extends RobotCfg {
                 Sensors.analog(hardwareMap,"potentiometer"));
         collector=new Collector(
                 Motors.withoutEncoder(hardwareMap.dcMotor.get("collection"),false,true,stoppers),
-
-                getServo(MainServoName.DOOR)        );
+                getServo(MainServoName.DOORRIGHT),
+                getServo(MainServoName.DOORLEFT)        );
          backFoot=getServo(MainServoName.BACKFOOT);
 
          hanging=new Hanging(
@@ -189,30 +193,42 @@ public class RoverRuckusRobotCfg extends RobotCfg {
 
 
     }
-    public enum doorPresets{
+    public enum DoorRightPresets {
         CLOSE,
-        RIGHT,
-        LEFT
+        OPEN
     }
-    public enum backFootPresets{
+
+    public enum DoorLeftPresets {
+        CLOSE,
+        OPEN
+    }
+    public enum BackFootPresets{
         LOCKED,
         OPENED,
         DEPLOYED
     }
 
-    public enum latchPresets{
+    public enum LatchPresets{
         LATCH,
         UNLATCH
     }
-    public enum markerPresets{
+    public enum MarkerPresets{
         HOLD,
         RELEASE
     }
+    public enum PhonePanPresets{
+        LEFT,
+        MIDDLE,
+        RIGHT
+
+    }
     public enum MainServoName implements ServoName {
-        LATCH("latch",latchPresets.values()),
-        DOOR("door",doorPresets.values()),
-        BACKFOOT("backFoot",backFootPresets.values()),
-        MARKER("marker",markerPresets.values());
+        LATCH("latch",LatchPresets.values()),
+        DOORRIGHT("doorRight",DoorRightPresets.values()),
+        DOORLEFT("doorLeft",DoorLeftPresets.values()),
+        BACKFOOT("backFoot",BackFootPresets.values()),
+        MARKER("marker",MarkerPresets.values()),
+        PHONEPAN("phonePan",PhonePanPresets.values());
 
         private final String hardwareName;
         private final Enum[] presets;
@@ -303,6 +319,7 @@ public class RoverRuckusRobotCfg extends RobotCfg {
     }
     public ServoControl getBackFoot(){return backFoot;}
     public ServoControl getMarker(){return marker;}
+    public ServoControl getPhonePan(){return phonePan;}
 
     @Override
     public Servos getServos() {

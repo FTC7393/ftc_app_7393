@@ -7,15 +7,19 @@ import evlib.hardware.control.MecanumControl;
 import evlib.hardware.sensors.Gyro;
 import evlib.opmodes.AbstractAutoOp;
 import evlib.statemachine.EVStateMachineBuilder;
+import evlib.util.EVConverters;
+import evlib.util.FileUtil;
 import ftc.electronvolts.statemachine.BasicAbstractState;
 import ftc.electronvolts.statemachine.EndCondition;
 import ftc.electronvolts.statemachine.EndConditions;
+import ftc.electronvolts.statemachine.State;
 import ftc.electronvolts.statemachine.StateMachine;
 import ftc.electronvolts.statemachine.StateName;
 import ftc.electronvolts.util.BasicResultReceiver;
 import ftc.electronvolts.util.ResultReceiver;
 import ftc.electronvolts.util.TeamColor;
 import ftc.electronvolts.util.files.Logger;
+import ftc.electronvolts.util.files.OptionsFile;
 import ftc.electronvolts.util.units.Angle;
 import ftc.electronvolts.util.units.Distance;
 import ftc.electronvolts.util.units.Time;
@@ -24,7 +28,18 @@ import ftc.electronvolts.util.units.Time;
 public class RoverRuckusAuto3 extends AbstractAutoOp<RoverRuckusRobotCfg> {
     Gyro gyro;
     MecanumControl mecanumControl;
-    ResultReceiver<TensorFlowObjectDetection> objectReciever = null;
+    double orientationDepot;
+    double directionDepot;
+    GoldDetector.Detection left;
+    GoldDetector.Detection right;
+    GoldDetector.Detection middle;
+    TeamColor teamColor;
+    boolean isStartingDepot;
+    boolean moveToOpponentCrater;
+    double wait;
+
+    GoldPosition goldPosition;
+
 
     @Override
     protected RoverRuckusRobotCfg createRobotCfg() {
@@ -52,13 +67,8 @@ public class RoverRuckusAuto3 extends AbstractAutoOp<RoverRuckusRobotCfg> {
     protected void act() {
         telemetry.addData("gyro", robotCfg.getGyro().getHeading());
         telemetry.addData("state", stateMachine.getCurrentStateName());
-        if (objectReciever != null) {
-            if (objectReciever.isReady()) {
-                telemetry.addData("location", objectReciever.getValue().getGoldLocation());
-            } else {
-                telemetry.addData("location", "not yet");
-            }
-        }
+        telemetry.addData("goldPosition",goldPosition);
+
     }
 
 
@@ -72,20 +82,318 @@ public class RoverRuckusAuto3 extends AbstractAutoOp<RoverRuckusRobotCfg> {
 
     @Override
     public StateMachine buildStates() {
-        TeamColor teamColor = TeamColor.RED;
-        objectReciever = TensorFlowObjectDetection.initThread(hardwareMap) ;
-        final ResultReceiver <String> goldLocationReceiver = new BasicResultReceiver<>();
+        OptionsFile optionsFile = new OptionsFile(EVConverters.getInstance(), FileUtil.getOptionsFile(RoverRuckusOptionsOp.FILENAME));
+
+
+         teamColor = TeamColor.RED;
+         isStartingDepot=optionsFile.get(RoverRuckusOptionsOp.isStartingDepot,RoverRuckusOptionsOp.isStartingDepotDefault);
+         moveToOpponentCrater=optionsFile.get(RoverRuckusOptionsOp.moveToOpponentCrater,RoverRuckusOptionsOp.moveToOpponentCraterDefault);
+        if(!moveToOpponentCrater){
+            orientationDepot=-45;
+            directionDepot=-135;
+        }
+        else{
+            orientationDepot=-135;
+            directionDepot=-45;
+
+        }
+        final ResultReceiver <GoldDetector.Detection> leftResultReceiver = new BasicResultReceiver<>();
+        final ResultReceiver <GoldDetector.Detection> middleResultReceiver = new BasicResultReceiver<>();
+        final ResultReceiver <GoldDetector.Detection> rightResultReceiver = new BasicResultReceiver<>();
+
+        final ResultReceiver<Boolean> notifyLeftResultReceiver=new BasicResultReceiver<>();
+        final ResultReceiver<Boolean> notifyMiddleResultReceiver=new BasicResultReceiver<>();
+        final ResultReceiver<Boolean> notifyRightResultReceiver=new BasicResultReceiver<>();
+
+
+
+        ObjectDetector.initThread(telemetry,hardwareMap,leftResultReceiver,notifyLeftResultReceiver) ;
+        //ObjectDetector.initThread(telemetry,hardwareMap,middleResultReceiver,notifyMiddleResultReceiver) ;
+        //ObjectDetector.initThread(telemetry,hardwareMap,rightResultReceiver,notifyRightResultReceiver) ;
 
 
 
         EVStateMachineBuilder b = robotCfg.createEVStateMachineBuilder(S.UP_HANGING, teamColor, Angle.fromDegrees(3));
-        b.add(S.UP_HANGING, new BasicAbstractState() {
+        b.add(S.UP_HANGING, createDescendState(S.RELEASE_LATCH));
+        //b.add(S.UNLATCH_SERVO)
+        //b.add(S.DRIVE-90DEGREES)
+        b.addServo(S.RELEASE_LATCH,S.DETECT_LEFT_GOLD,RoverRuckusRobotCfg.MainServoName.LATCH,RoverRuckusRobotCfg.LatchPresets.UNLATCH,true);
+
+        b.add(S.DETECT_LEFT_GOLD, new BasicAbstractState() {
+            @Override
+            public void init() {
+                notifyLeftResultReceiver.setValue(true);
+
+            }
+
+            @Override
+            public boolean isDone() {
+
+                left=leftResultReceiver.getValue();
+
+                return leftResultReceiver.isReady();
+            }
+
+            @Override
+            public StateName getNextStateName() {
+                return S.MOVE_SERVO_MIDDLE_GOLD;
+            }
+        });
+        b.addServo(S.MOVE_SERVO_MIDDLE_GOLD,S.DETECT_MIDDLE_GOLD,RoverRuckusRobotCfg.MainServoName.PHONEPAN,RoverRuckusRobotCfg.PhonePanPresets.MIDDLE,1.0,true);
+        b.add(S.DETECT_MIDDLE_GOLD, new BasicAbstractState() {
+            @Override
+            public void init() {
+                notifyMiddleResultReceiver.setValue(true);
+
+
+            }
+
+            @Override
+            public boolean isDone() {
+
+                middle=middleResultReceiver.getValue();
+                return middleResultReceiver.isReady();
+            }
+
+            @Override
+            public StateName getNextStateName() {
+                return S.MOVE_SERVO_RIGHT_GOLD;
+            }
+        });
+        b.addServo(S.MOVE_SERVO_RIGHT_GOLD,S.DETECT_RIGHT_GOLD,RoverRuckusRobotCfg.MainServoName.PHONEPAN,RoverRuckusRobotCfg.PhonePanPresets.RIGHT,1.0,true);
+        b.add(S.DETECT_RIGHT_GOLD, new BasicAbstractState() {
+            @Override
+            public void init() {
+                notifyRightResultReceiver.setValue(true);
+
+
+            }
+
+            @Override
+            public boolean isDone() {
+
+                right=rightResultReceiver.getValue();
+                return rightResultReceiver.isReady();
+            }
+
+            @Override
+            public StateName getNextStateName() {
+                return S.DRIVE_LITTLE;
+            }
+        });
+
+
+
+
+
+        b.addDrive(S.DRIVE_LITTLE,S.CHOOSE_POSITION,Distance.fromFeet(.2),.5,270,0);
+
+        b.add(S.CHOOSE_POSITION, new BasicAbstractState() {
+            @Override
+            public void init() {
+
+            }
+
+            @Override
+            public boolean isDone() {
+                return true;
+            }
+
+            @Override
+            public StateName getNextStateName() {
+                StateName postGoldStateName;
+
+                if(left==GoldDetector.Detection.GOLD&&right!=GoldDetector.Detection.GOLD&&middle!=GoldDetector.Detection.GOLD){
+                    goldPosition=GoldPosition.LEFT;
+                }
+                else if(left!=GoldDetector.Detection.GOLD&&right==GoldDetector.Detection.GOLD&&middle!=GoldDetector.Detection.GOLD){
+                    goldPosition=GoldPosition.RIGHT;
+                }
+                else if(left!=GoldDetector.Detection.GOLD&&right!=GoldDetector.Detection.GOLD&&middle==GoldDetector.Detection.GOLD){
+                    goldPosition=GoldPosition.MIDDLE;
+                }
+                else{
+                    goldPosition=GoldPosition.UNKNOWN;
+                }
+
+
+                if(goldPosition==GoldPosition.LEFT){
+
+                    postGoldStateName=S.LEFT_GOLD;
+                }
+                else if(goldPosition==GoldPosition.MIDDLE||goldPosition==GoldPosition.UNKNOWN){
+                    postGoldStateName=S.MIDDLE_GOLD;
+
+
+
+                }
+                else{
+                    //the only other option is right position
+                    postGoldStateName=S.RIGHT_GOLD;
+
+                }
+                return postGoldStateName;
+            }
+        });
+
+
+        //middle
+//        b.add(S.ROTATE_UP, new BasicAbstractState() {
+//            double extension=0;
+//            double rotation=1;
+//            boolean done=false;
+//            @Override
+//            public void init() {
+//
+//            }
+//
+//            @Override
+//            public boolean isDone() {
+//                while(!robotCfg.getArm().autoUse(extension,rotation)){
+//                    done=false;
+//
+//                }
+//                done =true;
+//
+//
+//
+//                return done;
+//            }
+//
+//            @Override
+//            public StateName getNextStateName() {
+//                return S.STOP;
+//            }
+//        });
+        b.addWait(S.MIDDLE_GOLD,S.STARTING_DEPOT_MIDDLE,0);
+        b.add(S.STARTING_DEPOT_MIDDLE, new BasicAbstractState() {
+            StateName depot;
+            @Override
+            public void init() {
+
+            }
+
+            @Override
+            public boolean isDone() {
+                return true;
+            }
+
+            @Override
+            public StateName getNextStateName() {
+                if(isStartingDepot){
+                    depot=S.DRIVE_TO_DEPOT_MORE;
+
+
+                }
+                else{
+                    depot=S.DRIVE_DEPOT_MIDDLE;
+                }
+                return depot;
+            }
+        });
+//        b.addDrive(S.DRIVE_DEPOT_MIDDLE,S.CRATER_TURN,Distance.fromFeet(3),.5,270,270);
+        b.addGyroTurn(S.DRIVE_DEPOT_MIDDLE,S.STRAFE_TO_CRATER,0, 0.5); // turn back to original dirn
+        b.addDrive(S.STRAFE_TO_CRATER,S.STOP,Distance.fromFeet(1.5),.5,270,0);
+
+        b.addDrive(S.DRIVE_TO_DEPOT_MORE,S.DRIVE_TO_DEPOT_BACK,Distance.fromFeet(5),.5,270,-90);
+        b.addDrive(S.DRIVE_TO_DEPOT_BACK,S.TURN_CRATER_AGAIN,Distance.fromFeet(.25),.5,90,-90);
+
+
+
+        //left
+        b.addDrive(S.LEFT_GOLD,S.STARTING_DEPOT_LEFT,Distance.fromFeet(1.4),.5,-35,270);
+        b.add(S.STARTING_DEPOT_LEFT, new BasicAbstractState() {
+            StateName depot;
+            @Override
+            public void init() {
+
+            }
+
+            @Override
+            public boolean isDone() {
+                return true;
+            }
+
+            @Override
+            public StateName getNextStateName() {
+                if(isStartingDepot){
+                    depot=S.LEFT_GOLD_FORWARD;
+
+
+                }
+                else{
+                    depot=S.CRATER_TURN;
+                }
+                return depot;
+            }
+        });
+        b.addGyroTurn(S.DEPOT_TURN_LEFT,S.STOP,-135,.5);
+
+        b.addDrive(S.LEFT_GOLD_FORWARD,S.LEFT_GOLD_TO_MIDDLE,Distance.fromFeet(1.3),.5,270,270);
+        b.addDrive(S.LEFT_GOLD_TO_MIDDLE,S.LEFT_GOLD_FORWARD_REMOVE,Distance.fromFeet(1.25),.5,215,270);
+        b.addDrive(S.LEFT_GOLD_FORWARD_REMOVE,S.LEFT_GOLD_FORWARD_BACK,Distance.fromFeet(1),.5,270,270);
+        b.addDrive(S.LEFT_GOLD_FORWARD_BACK,S.TURN_CRATER_AGAIN,Distance.fromFeet(1.2),.5,90,270);
+
+
+        //right
+        b.addDrive(S.RIGHT_GOLD,S.STARTING_DEPOT_RIGHT,Distance.fromFeet(1.4),.5,215,270);
+        b.add(S.STARTING_DEPOT_RIGHT, new BasicAbstractState() {
+            StateName depot;
+            @Override
+            public void init() {
+
+            }
+
+            @Override
+            public boolean isDone() {
+                return true;
+            }
+
+            @Override
+            public StateName getNextStateName() {
+                if(isStartingDepot){
+                    depot=S.RIGHT_GOLD_FORWARD;
+
+
+                }
+                else{
+                    depot=S.CRATER_TURN;
+                }
+                return depot;
+            }
+        });//-135
+        b.addGyroTurn(S.CRATER_TURN,S.CRATER_DRIVE,-135,.5);
+        b.addDrive(S.CRATER_DRIVE,S.STOP,Distance.fromFeet(1),.5,-135,-135);
+        b.addDrive(S.RIGHT_GOLD_FORWARD,S.RIGHT_GOLD_TO_MIDDLE,Distance.fromFeet(1.3),.5,270,270);
+        b.addDrive(S.RIGHT_GOLD_TO_MIDDLE,S.RIGHT_GOLD_FORWARD_REMOVE,Distance.fromFeet(1.25),.5,-35,270);
+        b.addDrive(S.RIGHT_GOLD_FORWARD_REMOVE,S.RIGHT_GOLD_FORWARD_BACK,Distance.fromFeet(1.5),.5,270,270);
+        b.addDrive(S.RIGHT_GOLD_FORWARD_BACK,S.TURN_CRATER_AGAIN,Distance.fromFeet(1.9),.5,90,270);
+
+
+
+
+        b.addGyroTurn(S.TURN_CRATER_AGAIN,S.MOVE_LITTLE,orientationDepot,.5);
+
+        //b.addWait(S.WAIT,S.DRIVE_TO_DEPOT,500);
+        b.addDrive(S.MOVE_LITTLE,S.RELEASE_MARKER,Distance.fromInches(9),.5,directionDepot,orientationDepot);
+        b.addServo(S.RELEASE_MARKER,S.WAIT_MARKER,RoverRuckusRobotCfg.MainServoName.MARKER,RoverRuckusRobotCfg.MarkerPresets.RELEASE,true);
+        b.addWait(S.WAIT_MARKER,S.DRIVE_TO_CRATER,Time.fromSeconds(.5));
+
+        //b.addWait(S.WAIT,S.DRIVE_TO_DEPOT,500);
+        b.addDrive(S.DRIVE_TO_CRATER,S.STOP,Distance.fromFeet(8.4),.5,-directionDepot,orientationDepot);
+        // to go towards the other crater is 135 degrees; note - the gain on the gyro on the gyro control needs adjusting to keep it from
+        b.addStop(S.STOP);
+
+        return b.build();
+    }
+
+    private State createDescendState(final StateName nextStateName) {
+        return new BasicAbstractState() {
             private ElapsedTime runtime = new ElapsedTime();
 
             @Override
             public void init() {
                 runtime.reset();
-
             }
 
             @Override
@@ -101,107 +409,30 @@ public class RoverRuckusAuto3 extends AbstractAutoOp<RoverRuckusRobotCfg> {
 //                        robotCfg.getMecanumControl().setRotationControl(RotationControls.ZERO);
 //                        robotCfg.getMecanumControl().setTranslationControl(TranslationControls.ZERO);
                     doneHanging=true;
-
                 }
-
-
                 return doneHanging;
             }
 
             @Override
             public StateName getNextStateName() {
-                return S.RELEASE_LATCH;
+                return nextStateName;
             }
-        });
-        //b.add(S.UNLATCH_SERVO)
-        //b.add(S.DRIVE-90DEGREES)
-        b.addServo(S.RELEASE_LATCH,S.WAIT,RoverRuckusRobotCfg.MainServoName.LATCH,RoverRuckusRobotCfg.latchPresets.UNLATCH,true);
-        b.addWait(S.WAIT,S.DRIVE_TO_DEPOT,500);
-        b.add(S.DETECT_GOLD, new BasicAbstractState() {
-            EndCondition timeout= EndConditions.timed(Time.fromSeconds(2));
-            String goldLocation;
-            TensorFlowObjectDetection tensorFlowObjectDetection;
-
-
-            @Override
-            public void init() {
-                timeout.init();
-                tensorFlowObjectDetection=objectReciever.getValue();
-
-
-            }
-
-            @Override
-            public boolean isDone() {
-                tensorFlowObjectDetection.act();
-                goldLocation=tensorFlowObjectDetection.getGoldLocation();
-                if(!goldLocation.equals("Unknown")){
-                    goldLocationReceiver.setValue(goldLocation);
-                }
-                return timeout.isDone()||!goldLocation.equals("Unknown");
-            }
-
-            @Override
-            public StateName getNextStateName() {
-                return S.DRIVE_TO_DEPOT;
-            }
-        });
-//        b.add(S.DOWN_HANGING, new BasicAbstractState() {
-//            private ElapsedTime runtime = new ElapsedTime();
-//
-//            @Override
-//            public void init() {
-//                runtime.reset();
-//
-//
-//            }
-//
-//            @Override
-//            public boolean isDone() {
-//                boolean doneHanging=false;
-//                if (!robotCfg.getHanging().isUnlatchLimitPressed()&&runtime.seconds() < 6.0) {
-//
-//                    robotCfg.getHanging().downHanging();
-//                } else {
-//                    robotCfg.getHanging().stopHanging();
-//                    doneHanging=true;
-//
-//                }
-//
-//
-//                return doneHanging;
-//            }
-//
-//            @Override
-//            public StateName getNextStateName() {
-//                return S.DRIVE_TO_DEPOT;
-//            }
-//        });
-        b.addDrive(S.DRIVE_TO_DEPOT,S.TURN_CRATER,Distance.fromFeet(.4),.5,270,0 );
-        b.addGyroTurn(S.TURN_CRATER,S.DRIVE_TO_DEPOT_MORE,-90,.5);
-        b.addDrive(S.DRIVE_TO_DEPOT_MORE,S.TURN_CRATER_AGAIN,Distance.fromFeet(4.5),.5,270,-90);
-
-        b.addGyroTurn(S.TURN_CRATER_AGAIN,S.MOVE_LITTLE,-45,.5);
-
-        //b.addWait(S.WAIT,S.DRIVE_TO_DEPOT,500);
-        b.addDrive(S.MOVE_LITTLE,S.RELEASE_MARKER,Distance.fromInches(9),.5,-135,-45);
-        b.addServo(S.RELEASE_MARKER,S.WAIT_MARKER,RoverRuckusRobotCfg.MainServoName.MARKER,RoverRuckusRobotCfg.markerPresets.RELEASE,true);
-        b.addWait(S.WAIT_MARKER,S.DRIVE_TO_CRATER,Time.fromSeconds(.5));
-
-        //b.addWait(S.WAIT,S.DRIVE_TO_DEPOT,500);
-        b.addDrive(S.DRIVE_TO_CRATER,S.STOP,Distance.fromFeet(8.2),.5,135,-45);
-        // to go towards the other crater is 135 degrees; note - the gain on the gyro on the gyro control needs adjusting to keep it from
-        b.addStop(S.STOP);
-
-        return b.build();
+        };
     }
 
 
     private enum S implements StateName {
         WAIT,
         TURN_CRATER,
+        LEFT_GOLD,
+        RIGHT_GOLD,
+        MIDDLE_GOLD,
         WAIT_MARKER,
+        TURN_TO_DETECT,
+        TURN_BACK,
+        TURN_DETECTION,
         MOVE_LITTLE,
+        MOVE_FROM_LANDER,
         TURN_CRATER_AGAIN,
         DRIVE_TO_DEPOT_MORE,
         UP_HANGING,
@@ -212,11 +443,28 @@ public class RoverRuckusAuto3 extends AbstractAutoOp<RoverRuckusRobotCfg> {
         START,
         RELEASE_MARKER,
         ANTITIP,
-
         DETECT_GOLD,
         STOP,
+        GOLD_ALIGN,
+        DRIVE_TO_DEPOT,
+        DRIVE_LITTLE,
+        DRIVE_TO_CRATER, RELEASE_LATCH
+        ,LEFT_GOLD_FORWARD,
+        LEFT_GOLD_TO_MIDDLE,
+        RIGHT_GOLD_FORWARD,
+        RIGHT_GOLD_TO_MIDDLE,
+        CHOOSE_POSITION,
+        DONT_HIT_GOLD_TURN,
+        RIGHT_DONT_HIT_GOLD_TURN,
+        COLLECT_MIDDLE,
+        LEFT_GOLD_FORWARD_REMOVE, LEFT_GOLD_FORWARD_BACK, RIGHT_GOLD_FORWARD_REMOVE,
+        RIGHT_GOLD_FORWARD_BACK, DRIVE_TO_DEPOT_BACK, STARTING_DEPOT, STARTING_DEPOT_RIGHT,
+        STARTING_DEPOT_LEFT, DEPOT_TURN_RIGHT, DEPOT_TURN_LEFT, STARTING_DEPOT_MIDDLE,
+        DRIVE_DEPOT_MIDDLE, STRAFE_TO_CRATER, DEPOT_TURN, CRATER_TURN, CRATER_DRIVE,
+        //ROTATE_UP,
+        DETECT_LEFT_GOLD, DETECT_RIGHT_GOLD, MOVE_SERVO_MIDDLE_GOLD, DETECT_MIDDLE_GOLD,
+        MOVE_SERVO_LEFT_GOLD, MOVE_SERVO_RIGHT_GOLD, LEFT_DONT_HIT_GOLD_TURN
 
-        GOLD_ALIGN, DRIVE_TO_DEPOT, DRIVE_LITTLE,DRIVE_TO_CRATER, RELEASE_LATCH
 
     }
 }

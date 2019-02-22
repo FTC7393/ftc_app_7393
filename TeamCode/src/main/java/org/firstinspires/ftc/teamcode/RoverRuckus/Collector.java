@@ -3,11 +3,7 @@ package org.firstinspires.ftc.teamcode.RoverRuckus;
 import com.qualcomm.robotcore.hardware.ColorSensor;
 
 import evlib.hardware.motors.Motor;
-import evlib.hardware.motors.MotorEnc;
-import evlib.hardware.sensors.DigitalSensor;
 import evlib.hardware.servos.ServoControl;
-import ftc.electronvolts.util.DigitalInputEdgeDetector;
-import ftc.electronvolts.util.PIDController;
 
 /**
  * Created by ftc7393 on 10/27/2018.
@@ -16,14 +12,16 @@ import ftc.electronvolts.util.PIDController;
 public class Collector {
 
     private Motor collection;
-    private ServoControl door;
+    private ServoControl doorRight;
+    private ServoControl doorLeft;
     private ColorSensor left;
     private ColorSensor right;
 //    public Collector(Motor collection, ServoControl door, ColorSensor left, ColorSensor right) {
 
-    public Collector(Motor collection, ServoControl door) {
+    public Collector(Motor collection, ServoControl doorRight, ServoControl doorLeft) {
         this.collection = collection;
-        this.door = door;
+        this.doorRight = doorRight;
+        this.doorLeft = doorLeft;
 //        this.left = left;
 //        this.right = right;
 
@@ -35,7 +33,8 @@ public class Collector {
        ;
     }
     public void collectionPower(double a){collection.setPower(a);}
-    public void rightDoor(){door.goToPreset(RoverRuckusRobotCfg.doorPresets.RIGHT);}
-    public void leftDoor(){door.goToPreset(RoverRuckusRobotCfg.doorPresets.LEFT);}
-    public void closeDoor(){door.goToPreset(RoverRuckusRobotCfg.doorPresets.CLOSE);}
+    public void openRightDoor(){doorRight.goToPreset(RoverRuckusRobotCfg.DoorRightPresets.OPEN);}
+    public void closeRightDoor(){doorRight.goToPreset(RoverRuckusRobotCfg.DoorRightPresets.CLOSE);}
+    public void openLeftDoor(){doorLeft.goToPreset(RoverRuckusRobotCfg.DoorLeftPresets.OPEN);}
+    public void closeLeftDoor(){doorLeft.goToPreset(RoverRuckusRobotCfg.DoorLeftPresets.CLOSE);}
 }

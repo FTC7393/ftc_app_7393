@@ -61,7 +61,7 @@ public class RoverRuckusAutoState extends AbstractAutoOp<RoverRuckusRobotCfg> {
         TeamColor teamColor = TeamColor.RED;
 
         EVStateMachineBuilder b = robotCfg.createEVStateMachineBuilder(S.ANTITIP, teamColor, Angle.fromDegrees(1));
-        b.addServo(S.ANTITIP,S.DRIVE_TO_DEPOT,robotCfg.backFoot.getName(),RoverRuckusRobotCfg.backFootPresets.OPENED,false);
+        b.addServo(S.ANTITIP,S.DRIVE_TO_DEPOT,robotCfg.backFoot.getName(),RoverRuckusRobotCfg.BackFootPresets.OPENED,false);
         b.addDrive(S.DRIVE_TO_DEPOT,S.ROTATE, Distance.fromFeet(16),1,180,0);
         b.add(S.ROTATE, new BasicAbstractState() {
             @Override
@@ -98,7 +98,7 @@ public class RoverRuckusAutoState extends AbstractAutoOp<RoverRuckusRobotCfg> {
                 return S.RELEASE_MARKER;
             }
         });
-        b.addServo(S.RELEASE_MARKER,S.STOP,robotCfg.Door.getName(),RoverRuckusRobotCfg.doorPresets.LEFT,true);
+        //b.addServo(S.RELEASE_MARKER,S.STOP,robotCfg.Door.getName(),RoverRuckusRobotCfg.doorPresets.LEFT,true);
 
         b.addStop(S.STOP);
 

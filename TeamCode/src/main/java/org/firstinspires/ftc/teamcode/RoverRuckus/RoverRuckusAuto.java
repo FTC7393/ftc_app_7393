@@ -116,7 +116,7 @@ public class RoverRuckusAuto extends AbstractOp<RoverRuckusRobotCfg> {
 //
 //        }
         if(state==StateName.ANTITIP){
-            robotCfg.getBackFoot().goToPreset(RoverRuckusRobotCfg.backFootPresets.DEPLOYED);
+            robotCfg.getBackFoot().goToPreset(RoverRuckusRobotCfg.BackFootPresets.DEPLOYED);
             runtime.reset();
 
             state=StateName.DRIVE_LITTLE;
@@ -162,9 +162,9 @@ public class RoverRuckusAuto extends AbstractOp<RoverRuckusRobotCfg> {
 //
 //
 //        }
-        if(state==StateName.RELEASE_MARKER){
-            robotCfg.getCollector().leftDoor();
-        }
+       // if(state==StateName.RELEASE_MARKER){
+         //   robotCfg.getCollector().leftDoor();
+        //}
 //        final ResultReceiver<SamplingOrderDetector.GoldLocation> goldLocationReceiver= SamplingOrderExample.initThread(hardwareMap);
 //
 //        SamplingOrderDetector.GoldLocation goldLocation;

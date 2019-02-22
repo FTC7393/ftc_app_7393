@@ -3,11 +3,7 @@ package org.firstinspires.ftc.teamcode.RoverRuckus;
 import android.util.Log;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.io.BaseEncoding;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-import com.qualcomm.robotcore.exception.RobotCoreException;
-
-import org.firstinspires.ftc.teamcode.relic2017.TeleOpPlayback;
 
 import evlib.hardware.control.RotationControls;
 import evlib.hardware.control.TranslationControls;
@@ -135,6 +131,8 @@ public class RoverRuckusTeleOp extends AbstractTeleOp<RoverRuckusRobotCfg>{
 
     @Override
     protected void setup_act() {
+        robotCfg.getHanging().unlatch();
+        robotCfg.getPhonePan().goToPreset(RoverRuckusRobotCfg.PhonePanPresets.MIDDLE);
 
     }
     private void forwardControl() {
@@ -238,14 +236,17 @@ public class RoverRuckusTeleOp extends AbstractTeleOp<RoverRuckusRobotCfg>{
         //    robotCfg.getCollector().rightDoor();
         //}
         //else
-        if(driver1.right_bumper.isPressed() && !driver1.left_bumper.isPressed()){
-            robotCfg.getCollector().leftDoor();
+        if(driver1.right_bumper.isPressed()){
+            robotCfg.getCollector().openLeftDoor();
         }
-        else if(driver1.left_bumper.isPressed() && !driver1.right_bumper.isPressed()) {
-            robotCfg.getCollector().rightDoor();
+        else {
+            robotCfg.getCollector().closeLeftDoor();
+        }
+        if(driver1.left_bumper.isPressed()) {
+            robotCfg.getCollector().openRightDoor();
         }
         else{
-            robotCfg.getCollector().closeDoor();
+            robotCfg.getCollector().closeRightDoor();
         }
 
         double collectorValue = driver1.left_trigger.getValue() + (-driver1.right_trigger.getValue())
@@ -274,13 +275,13 @@ public class RoverRuckusTeleOp extends AbstractTeleOp<RoverRuckusRobotCfg>{
         }
 
         if(backFootState == 0) {
-            robotCfg.getBackFoot().goToPreset(RoverRuckusRobotCfg.backFootPresets.LOCKED);
+            robotCfg.getBackFoot().goToPreset(RoverRuckusRobotCfg.BackFootPresets.LOCKED);
         }
         else if (backFootState == 1) {
-            robotCfg.getBackFoot().goToPreset(RoverRuckusRobotCfg.backFootPresets.OPENED);
+            robotCfg.getBackFoot().goToPreset(RoverRuckusRobotCfg.BackFootPresets.OPENED);
         }
         else if (backFootState == 2) {
-            robotCfg.getBackFoot().goToPreset(RoverRuckusRobotCfg.backFootPresets.DEPLOYED);
+            robotCfg.getBackFoot().goToPreset(RoverRuckusRobotCfg.BackFootPresets.DEPLOYED);
         }
 
 
@@ -322,11 +323,11 @@ public class RoverRuckusTeleOp extends AbstractTeleOp<RoverRuckusRobotCfg>{
 
         if(driver2.right_stick_button.justPressed()){
             if(markerOn==true) {
-                robotCfg.getMarker().goToPreset(RoverRuckusRobotCfg.markerPresets.RELEASE);
+                robotCfg.getMarker().goToPreset(RoverRuckusRobotCfg.MarkerPresets.RELEASE);
                 markerOn=false;
             }
             else if(markerOn==false){
-                robotCfg.getMarker().goToPreset(RoverRuckusRobotCfg.markerPresets.HOLD);
+                robotCfg.getMarker().goToPreset(RoverRuckusRobotCfg.MarkerPresets.HOLD);
                 markerOn=true;
 
             }

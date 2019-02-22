@@ -17,12 +17,12 @@ import ftc.electronvolts.util.units.Time;
 /**
  * Created by ftc7393 on 9/22/2018.
  */
-@TeleOp(name = "kidFest")
-@Disabled
+@TeleOp(name = "KidFest")
 public class kidFestTeleOp extends AbstractTeleOp<kidFestRobotCfg> {
     private DcMotor dump = null;
     private DcMotor collector = null;
     int dumpPosition;
+    boolean driver1CollectorEnabled = true;
     @Override
     public Time getMatchTime() {
         return Time.fromMinutes(180); //teleop is 2 minutes
@@ -89,7 +89,7 @@ public class kidFestTeleOp extends AbstractTeleOp<kidFestRobotCfg> {
         double f = currentSpeedFactor.getFactor();
         rightY = new ScalingInputExtractor(driver1.right_stick_y, f);
         leftX = new ScalingInputExtractor(driver1.left_stick_x, f);
-        rightX = new ScalingInputExtractor(InputExtractors.negative(driver1.right_stick_x), f);
+        rightX = new ScalingInputExtractor(InputExtractors.negative(driver1.right_stick_x), -1.0*f);
         //noinspection SuspiciousNameCombination
         robotCfg.getMecanumControl().setTranslationControl(TranslationControls.inputExtractorXY(rightY, rightX));
 //        robotCfg.getMecanumControl().setRotationControl(RotationControls.teleOpGyro(leftX, robotCfg.getGyro()));
@@ -107,38 +107,31 @@ public class kidFestTeleOp extends AbstractTeleOp<kidFestRobotCfg> {
 
         collector=robotCfg.getCollector();
         dump  = robotCfg.getDump();
-        if(driver2.dpad_up.isPressed()) {
-            dump.setPower(2);
 
-
-
+        if(driver2.x.isPressed()) {
+            driver1CollectorEnabled = false;
+        } else {
+            driver1CollectorEnabled = true;
         }
-        if(driver2.dpad_down.isPressed()) {
-            dump.setPower(-2);
 
-
-
-        }
-        else{
-            dump.setPower(0);
-
-        }
-        if(driver2.y.justPressed()){
+        // Collector logic: Driver 2 has priority, Driver 1 can be disabled as well
+        if(driver2.right_bumper.isPressed() ||
+                (driver1.right_bumper.isPressed() && driver1CollectorEnabled == true) ){
+            collector.setPower(-0.8);
+        } else if(driver2.left_bumper.isPressed()) {
+            collector.setPower(0.8);
+        } else {
             collector.setPower(0);
-
-        }
-        else if(driver2.x.justPressed()){
-            collector.setPower(-.8);
-
-        }
-        else if(driver2.b.justPressed()){
-            collector.setPower(.8);
-
         }
 
-
-
-
+        // Dumper control
+        if(driver2.y.isPressed()) {
+            dump.setPower(1.0);
+        } else if(driver2.a.isPressed()) {
+            dump.setPower(-1.0);
+        } else{
+            dump.setPower(0);
+        }
     }
 
     @Override

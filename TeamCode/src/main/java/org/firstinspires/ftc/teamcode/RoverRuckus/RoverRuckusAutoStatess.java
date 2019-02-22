@@ -60,9 +60,10 @@ public class RoverRuckusAutoStatess extends AbstractAutoOp<RoverRuckusRobotCfg> 
         TeamColor teamColor = TeamColor.RED;
 
         EVStateMachineBuilder b = robotCfg.createEVStateMachineBuilder(S.ANTITIP, teamColor, Angle.fromDegrees(1));
-        b.addServo(S.ANTITIP,S.DRIVE_TO_DEPOT,robotCfg.backFoot.getName(),RoverRuckusRobotCfg.backFootPresets.OPENED,false);
+        b.addServo(S.ANTITIP,S.DRIVE_TO_DEPOT,robotCfg.backFoot.getName(),RoverRuckusRobotCfg.BackFootPresets.OPENED,false);
         b.addDrive(S.DRIVE_TO_DEPOT,S.RELEASE_MARKER, Distance.fromFeet(16),1,180,0);
-        b.addServo(S.RELEASE_MARKER,S.STOP,robotCfg.Door.getName(),RoverRuckusRobotCfg.doorPresets.LEFT,true);
+        // Commented out next line when we updated the door code.
+        //b.addServo(S.RELEASE_MARKER,S.STOP,robotCfg.Door.getName(),RoverRuckusRobotCfg.doorPresets.LEFT,true);
 
         b.addStop(S.STOP);
 

@@ -213,7 +213,7 @@ public class Arm {
         if(potentiometerValue > rotationFastZoneMin && potentiometerValue < rotationFastZoneMax) {
             rotationSetPoint = rotationSetPoint + 80*(-y);
         } else {
-            rotationSetPoint = rotationSetPoint + 65*(-y);
+            rotationSetPoint = rotationSetPoint + 70*(-y);
         }
 
     }
@@ -244,6 +244,38 @@ public class Arm {
     public void dumpSilverExtension(){extensionSetPoint=dumpSilverExtensionPosition;}
     public void collectExtension(){extensionSetPoint=collectExtensionPosition;}
     public void stowExtension(){extensionSetPoint=stowExtensionPosition;}
+    public boolean autoUse(double extension,double rotation){
+        boolean done=false;
+        extensionSetPoint=extension;
+        rotationPotentiometerTarget = rotation;
+        rotationPotentiometerControl = true;
+        if((Math.abs(rotationPotentiometerTarget-potentiometerValue) > 0.05)||(Math.abs(extensionSetPoint-extensionEncoder)>5)) {
+            done=false;
+        }
+        else{
+            done=true;
+        }
+
+
+        return done;
+
+    }
+//    public boolean autoCollect(){
+//        boolean done=false;
+//        extensionSetPoint=collectExtensionPosition;
+//        rotationPotentiometerTarget = coll;
+//        rotationPotentiometerControl = true;
+//        if((Math.abs(rotationPotentiometerTarget-potentiometerValue) > 0.05)||(Math.abs(extensionSetPoint-extensionEncoder)>5)) {
+//            done=false;
+//        }
+//        else{
+//            done=true;
+//        }
+//
+//
+//        return done;
+//
+//    }
     public double getRotationEncoder(){return rotationEncoder;}
     public double getExtensionEncoder(){return extensionEncoder;}
     public double getMinRotationValue(){return minRotationPosition;}
@@ -266,7 +298,18 @@ public class Arm {
 //        rotationLockSetPoint = rotationEncoder;  // Save the point we were at when we pressed the lock button62
 //    }
 //    public void unlockRotation(){isLocked=false;rotationLock.goToPreset(RoverRuckusRobotCfg.rotationLockPresets.UNLOCKED);}
+    double theta1;
+    double theta2;
+    double r1;
+    double r2;
 
+    double armAjust (double r){
+        double slope,b,theta;
+        slope=(theta2-theta1)/(r2-r1);
+        b=-((slope*r1)-theta1);
+        theta=slope*r+b;
+        return theta;
+    }
 
 
 

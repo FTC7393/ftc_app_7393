@@ -67,10 +67,10 @@ public class Hanging {
     }
 
     public void unlatch(){
-        latch.goToPreset(RoverRuckusRobotCfg.latchPresets.UNLATCH);
+        latch.goToPreset(RoverRuckusRobotCfg.LatchPresets.UNLATCH);
   }
     public void latch(){
-      latch.goToPreset(RoverRuckusRobotCfg.latchPresets.LATCH);
+      latch.goToPreset(RoverRuckusRobotCfg.LatchPresets.LATCH);
   }
     public boolean islatchLimitPressed(){
         return latchLimitPressed;

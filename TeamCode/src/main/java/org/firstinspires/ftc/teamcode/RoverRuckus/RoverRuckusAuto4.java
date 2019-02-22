@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode.RoverRuckus;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import evlib.hardware.config.RobotCfg;
@@ -20,7 +21,7 @@ import ftc.electronvolts.util.units.Angle;
 import ftc.electronvolts.util.units.Distance;
 import ftc.electronvolts.util.units.Time;
 @Autonomous(name = "RoverRuckusAutoOp4")
-
+@Disabled
 public class RoverRuckusAuto4 extends AbstractAutoOp<RoverRuckusRobotCfg> {
     Gyro gyro;
     MecanumControl mecanumControl;
@@ -103,7 +104,7 @@ public class RoverRuckusAuto4 extends AbstractAutoOp<RoverRuckusRobotCfg> {
         });
         //b.add(S.UNLATCH_SERVO)
         //b.add(S.DRIVE-90DEGREES)
-        b.addServo(S.RELEASE_LATCH,S.WAIT,RoverRuckusRobotCfg.MainServoName.LATCH,RoverRuckusRobotCfg.latchPresets.UNLATCH,true);
+        b.addServo(S.RELEASE_LATCH,S.WAIT,RoverRuckusRobotCfg.MainServoName.LATCH,RoverRuckusRobotCfg.LatchPresets.UNLATCH,true);
         b.addWait(S.WAIT,S.DRIVE_TO_DEPOT,500);
 //        b.add(S.DOWN_HANGING, new BasicAbstractState() {
 //            private ElapsedTime runtime = new ElapsedTime();
@@ -144,7 +145,7 @@ public class RoverRuckusAuto4 extends AbstractAutoOp<RoverRuckusRobotCfg> {
 
         //b.addWait(S.WAIT,S.DRIVE_TO_DEPOT,500);
         b.addDrive(S.MOVE_LITTLE,S.RELEASE_MARKER,Distance.fromInches(10.5),.5,-45,-135);
-        b.addServo(S.RELEASE_MARKER,S.WAIT_MARKER,RoverRuckusRobotCfg.MainServoName.MARKER,RoverRuckusRobotCfg.markerPresets.RELEASE,true);
+        b.addServo(S.RELEASE_MARKER,S.WAIT_MARKER,RoverRuckusRobotCfg.MainServoName.MARKER,RoverRuckusRobotCfg.MarkerPresets.RELEASE,true);
         b.addWait(S.WAIT_MARKER,S.DRIVE_TO_CRATER,Time.fromSeconds(.5));
 
         //b.addWait(S.WAIT,S.DRIVE_TO_DEPOT,500);

@@ -29,15 +29,15 @@ public class kidFestRobotCfg extends RobotCfg {
         super(hardwareMap);
         double scaleFactor = 1.0;
         mecanumControl = new MecanumControl(new MecanumMotors(
-                Motors.withEncoder(hardwareMap.dcMotor.get("0"), true, true, stoppers),
-                Motors.withEncoder(hardwareMap.dcMotor.get("1") , false, true, stoppers),
-                Motors.scale(Motors.withEncoder(hardwareMap.dcMotor.get("2") , true, true, stoppers),scaleFactor),
-                Motors.scale(Motors.withEncoder(hardwareMap.dcMotor.get("3") , false, true, stoppers),scaleFactor),
+                Motors.withEncoder(hardwareMap.dcMotor.get("frontLeft"), true, true, stoppers), // 0
+                Motors.withEncoder(hardwareMap.dcMotor.get("frontRight") , false, true, stoppers), // 1
+                Motors.scale(Motors.withEncoder(hardwareMap.dcMotor.get("backRight") , true, true, stoppers),scaleFactor), // 2
+                Motors.scale(Motors.withEncoder(hardwareMap.dcMotor.get("backLeft") , false, true, stoppers),scaleFactor), // 3
                 true, MAX_ROBOT_SPEED,MAX_ROBOT_SPEED_SIDEWAYS));
-        dump  = hardwareMap.get(DcMotor.class, "dump");
+        dump  = hardwareMap.get(DcMotor.class, "arm");
         dump.setPower(0);
         dump.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        collector  = hardwareMap.get(DcMotor.class, "collector");
+        collector  = hardwareMap.get(DcMotor.class, "collection");
         collector.setPower(0);
         collector.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
