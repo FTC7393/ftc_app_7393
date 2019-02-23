@@ -78,7 +78,7 @@ public class ObjectDetectorTest {
                                   final Telemetry telemetry, final HardwareMap hardwareMap,
                                   final ResultReceiver<GoldDetector.Detection> goldPositionResultReceiver,
                                   final ResultReceiver<Boolean> actResultReceiver) {
-        final ObjectDetector objectDetector = new ObjectDetector(hardwareMap, telemetry);
+        final ObjectDetectorTest objectDetector = new ObjectDetectorTest(hardwareMap, telemetry);
         //start the init in a new thread
         new Thread(new Runnable() {
             @Override
@@ -129,7 +129,7 @@ public class ObjectDetectorTest {
         List<Recognition> updatedRecognitions = tfodMgr.getTfod().getUpdatedRecognitions();
         if (updatedRecognitions != null) {
             GoldDetector gd = new GoldDetector(updatedRecognitions);
-            GoldDetector.Detection detection = gd.findPosition(telemetry);
+            GoldDetector.Detection detection = null; // needs update // gd.findPosition(telemetry);
             return detection;
         }
         return null;

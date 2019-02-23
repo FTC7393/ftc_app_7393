@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode.RoverRuckus;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import evlib.hardware.control.MecanumControl;
@@ -23,7 +24,7 @@ import ftc.electronvolts.util.units.Distance;
 import ftc.electronvolts.util.units.Time;
 
 @Autonomous(name = "RoverRuckusAutoOpTest")
-
+@Disabled
 public class RoverRuckusAutoTest extends AbstractAutoOp<RoverRuckusRobotCfg> {
     Gyro gyro;
     MecanumControl mecanumControl;

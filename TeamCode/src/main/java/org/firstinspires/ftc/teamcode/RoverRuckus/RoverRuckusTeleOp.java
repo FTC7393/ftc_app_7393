@@ -21,42 +21,50 @@ import ftc.electronvolts.util.units.Time;
  */
 @TeleOp(name = "RoverRuckusTeleOp")
 
-public class RoverRuckusTeleOp extends AbstractTeleOp<RoverRuckusRobotCfg>{
+public class RoverRuckusTeleOp extends AbstractTeleOp<RoverRuckusRobotCfg> {
     public Time getMatchTime() {
         return Time.fromMinutes(2); //teleop is 2 minutes
     }
+
     int backFootState = 0;
-    boolean latch=true;
-    boolean markerOn=true;
+    boolean latch = true;
+    boolean markerOn = true;
     double rotationValue;
     double extensionValue;
     ScalingInputExtractor rightY;
     ScalingInputExtractor leftX;
     ScalingInputExtractor rightX;
+
     class ScalingInputExtractor implements InputExtractor<Double> {
         InputExtractor<Double> ext;
         private double factor;
+
         ScalingInputExtractor(InputExtractor<Double> ext, double f) {
             this.ext = ext;
             this.factor = f;
         }
+
         @Override
         public Double getValue() {
-            return ext.getValue()*factor;
+            return ext.getValue() * factor;
         }
+
         public void setFactor(double f) {
             this.factor = f;
         }
     }
+
     private MotorSpeedFactor currentSpeedFactor = MotorSpeedFactor.SLOW;
     private MotorSpeedFactor lastXSpeedFactor = currentSpeedFactor;
 
     enum MotorSpeedFactor {
         FAST(1.0), SLOW(0.5), SUPER_SLOW(0.2);
         private double factor;
+
         MotorSpeedFactor(double x) {
             this.factor = x;
         }
+
         public double getFactor() {
             return factor;
         }
@@ -74,53 +82,43 @@ public class RoverRuckusTeleOp extends AbstractTeleOp<RoverRuckusRobotCfg>{
 
     @Override
     protected Logger createLogger() {
-        return new Logger("", "teleop.csv", new ImmutableList.Builder<Logger.Column>()
-
-        .add(new Logger.Column("Rotation Joystick", new InputExtractor<Double>() {
-            @Override
-            public Double getValue() {
-
-
-
-                return getRotationValue();
-            }
-        }))
-                .add(new Logger.Column("leftX", new InputExtractor<Double>() {
-                    @Override
-                    public Double getValue() {
-
-
-
-                        return driver1.left_stick_x.getValue();
-                    }
-                }))
-                .add(new Logger.Column("rightY", new InputExtractor<Double>() {
-                    @Override
-                    public Double getValue() {
-
-
-
-                        return driver1.right_stick_y.getValue();
-                    }
-                }))
-                .add(new Logger.Column("rightX", new InputExtractor<Double>() {
-                    @Override
-                    public Double getValue() {
-
-
-
-                        return driver1.right_stick_x.getValue();
-                    }
-                }))
-                .add(new Logger.Column("Extension Joystick", new InputExtractor<Double>() {
-                    @Override
-                    public Double getValue() {
-
-
-
-                        return getExtensionValue();
-                    }
-                })).addAll(robotCfg.getLoggerColumns()).build());
+        return new Logger("", "teleop.csv",
+                new ImmutableList.Builder<Logger.Column>()
+                        .add(
+                                new Logger.Column("Rotation Joystick",
+                                        new InputExtractor<Double>()
+                                        {
+                                            @Override
+                                            public Double getValue() {
+                                                return getRotationValue();
+                                            }
+                                        }
+                                    )
+                        )
+                        .add(new Logger.Column("leftX", new InputExtractor<Double>() {
+                            @Override
+                            public Double getValue() {
+                                return driver1.left_stick_x.getValue();
+                            }
+                        }))
+                        .add(new Logger.Column("rightY", new InputExtractor<Double>() {
+                            @Override
+                            public Double getValue() {
+                                return driver1.right_stick_y.getValue();
+                            }
+                        }))
+                        .add(new Logger.Column("rightX", new InputExtractor<Double>() {
+                            @Override
+                            public Double getValue() {
+                                return driver1.right_stick_x.getValue();
+                            }
+                        }))
+                        .add(new Logger.Column("Extension Joystick", new InputExtractor<Double>() {
+                            @Override
+                            public Double getValue() {
+                                return getExtensionValue();
+                            }
+                        })).addAll(robotCfg.getLoggerColumns()).build());
 
     }
 
@@ -135,6 +133,7 @@ public class RoverRuckusTeleOp extends AbstractTeleOp<RoverRuckusRobotCfg>{
         robotCfg.getPhonePan().goToPreset(RoverRuckusRobotCfg.PhonePanPresets.MIDDLE);
 
     }
+
     private void forwardControl() {
         double f = currentSpeedFactor.getFactor();
         //rightY and leftX are inversed only if the mecanum wheels are pointed out
@@ -147,6 +146,7 @@ public class RoverRuckusTeleOp extends AbstractTeleOp<RoverRuckusRobotCfg>{
 //        robotCfg.getMecanumControl().setRotationControl(RotationControls.teleOpGyro(leftX, robotCfg.getGyro()));
         robotCfg.getMecanumControl().setRotationControl(RotationControls.inputExtractor(leftX));
     }
+
     @Override
     protected void go() {
 
@@ -154,7 +154,7 @@ public class RoverRuckusTeleOp extends AbstractTeleOp<RoverRuckusRobotCfg>{
     }
 
 
-    StepTimer teleOpTimer = new StepTimer("teleOp",Log.INFO);
+    StepTimer teleOpTimer = new StepTimer("teleOp", Log.INFO);
 
     @Override
     protected void act() {
@@ -162,9 +162,9 @@ public class RoverRuckusTeleOp extends AbstractTeleOp<RoverRuckusRobotCfg>{
         teleOpTimer.step("forwardControl");
 
 
-        if(driver1.right_stick_button.isPressed()) {
+        if (driver1.right_stick_button.isPressed()) {
             currentSpeedFactor = MotorSpeedFactor.SUPER_SLOW;
-        } else if(driver1.left_stick_button.isPressed()){
+        } else if (driver1.left_stick_button.isPressed()) {
             currentSpeedFactor = MotorSpeedFactor.SLOW;
         }
 
@@ -180,48 +180,45 @@ public class RoverRuckusTeleOp extends AbstractTeleOp<RoverRuckusRobotCfg>{
         // Driver2 right_bumper: GOLD DUMP, Extend 1985, Rotate 2.47
 
         // Extension presets and control
-        if(driver2.dpad_down.isPressed()){
+        if (driver2.dpad_down.isPressed()) {
             // STOW ARM
             // Move to Extension 0
             robotCfg.getArm().stowExtension();
 
-        } else if(driver2.dpad_up.isPressed()) {
+        } else if (driver2.dpad_up.isPressed()) {
             // COLLECT ARM
             // Move to Extension 1985
             robotCfg.getArm().collectExtension();
 
-        } else if(driver2.left_bumper.isPressed()) {
+        } else if (driver2.left_bumper.isPressed()) {
             // SILVER DUMP:
             // Move to Extension 1596
             robotCfg.getArm().dumpSilverExtension();
 
-        } else if(driver2.right_bumper.isPressed()) {
+        } else if (driver2.right_bumper.isPressed()) {
             // GOLD DUMP:
             // Move to Extension 1985
             robotCfg.getArm().dumpGoldExtension();
 
-        } else if(driver2.dpad_up.justReleased() || driver2.dpad_down.justReleased() ||
-                  driver2.left_bumper.justReleased() || driver2.right_bumper.justReleased()) {
+        } else if (driver2.dpad_up.justReleased() || driver2.dpad_down.justReleased() ||
+                driver2.left_bumper.justReleased() || driver2.right_bumper.justReleased()) {
             robotCfg.getArm().stopExtension();
-        }
-        else
-        {
+        } else {
             extensionValue = driver2.right_stick_y.getValue();
             robotCfg.getArm().controlExtension(extensionValue);
         }
 
         // Rotation presets and control
-        if( driver2.left_bumper.isPressed()){
+        if (driver2.left_bumper.isPressed()) {
             robotCfg.getArm().dumpSilverRotation();
 
-        } else if(driver2.right_bumper.isPressed()){
+        } else if (driver2.right_bumper.isPressed()) {
             robotCfg.getArm().dumpGoldRotation();
 
-        } else if(driver2.right_bumper.justReleased() || driver2.left_bumper.justReleased()) {
+        } else if (driver2.right_bumper.justReleased() || driver2.left_bumper.justReleased()) {
             robotCfg.getArm().stopRotation();
 
-        }
-        else {
+        } else {
             rotationValue = driver2.left_stick_y.getValue();
             robotCfg.getArm().controlRotation(rotationValue);
         }
@@ -236,16 +233,14 @@ public class RoverRuckusTeleOp extends AbstractTeleOp<RoverRuckusRobotCfg>{
         //    robotCfg.getCollector().rightDoor();
         //}
         //else
-        if(driver1.right_bumper.isPressed()){
+        if (driver1.right_bumper.isPressed()) {
             robotCfg.getCollector().openLeftDoor();
-        }
-        else {
+        } else {
             robotCfg.getCollector().closeLeftDoor();
         }
-        if(driver1.left_bumper.isPressed()) {
+        if (driver1.left_bumper.isPressed()) {
             robotCfg.getCollector().openRightDoor();
-        }
-        else{
+        } else {
             robotCfg.getCollector().closeRightDoor();
         }
 
@@ -257,30 +252,27 @@ public class RoverRuckusTeleOp extends AbstractTeleOp<RoverRuckusRobotCfg>{
         teleOpTimer.step("backFoot_control");
 
 
-        if(driver1.y.justPressed() || driver2.y.justPressed()){
-                backFootState = 0;  // Commanded to go to locked (starting) position
-        }
-        else if(driver1.x.justPressed() || driver2.x.justPressed()) {
+        if (driver1.y.justPressed() || driver2.y.justPressed()) {
+            backFootState = 0;  // Commanded to go to locked (starting) position
+        } else if (driver1.x.justPressed() || driver2.x.justPressed()) {
             if (backFootState == 0 || backFootState == 1) {
                 backFootState = 2;  // Opened (above ground)
             } else if (backFootState == 2) {
                 backFootState = 1;  // Deployed (touching ground)
             }
         }
-        if(robotCfg.getArm().getPotentiometerValue() > 1.7) {
+        if (robotCfg.getArm().getPotentiometerValue() > 1.7) {
             // Arm is up, we can't go to position 0
-            if(backFootState == 0) {
+            if (backFootState == 0) {
                 backFootState = 1;
             }
         }
 
-        if(backFootState == 0) {
+        if (backFootState == 0) {
             robotCfg.getBackFoot().goToPreset(RoverRuckusRobotCfg.BackFootPresets.LOCKED);
-        }
-        else if (backFootState == 1) {
+        } else if (backFootState == 1) {
             robotCfg.getBackFoot().goToPreset(RoverRuckusRobotCfg.BackFootPresets.OPENED);
-        }
-        else if (backFootState == 2) {
+        } else if (backFootState == 2) {
             robotCfg.getBackFoot().goToPreset(RoverRuckusRobotCfg.BackFootPresets.DEPLOYED);
         }
 
@@ -290,50 +282,43 @@ public class RoverRuckusTeleOp extends AbstractTeleOp<RoverRuckusRobotCfg>{
 
         teleOpTimer.step("Hanging/Latch/Marker");
 
-        if(driver1.dpad_up.isPressed()){
+        if (driver1.dpad_up.isPressed()) {
             robotCfg.getHanging().upHanging();
-        }
-        else if(driver1.dpad_down.isPressed()){
+        } else if (driver1.dpad_down.isPressed()) {
 
             robotCfg.getHanging().downHanging();
-        }
-        else{
+        } else {
             robotCfg.getHanging().stopHanging();
 
         }
 
 
-        if(driver1.b.justPressed()){
-            if(latch==true){
+        if (driver1.b.justPressed()) {
+            if (latch == true) {
                 //telemetry.addLine("latch");
 
                 robotCfg.getHanging().latch();
-                latch=false;
+                latch = false;
 
-            }
-            else if(latch==false){
+            } else if (latch == false) {
                 //telemetry.addLine("unlatch");
 
                 robotCfg.getHanging().unlatch();
-                latch=true;
+                latch = true;
             }
         }
 
 
-
-        if(driver2.right_stick_button.justPressed()){
-            if(markerOn==true) {
+        if (driver2.right_stick_button.justPressed()) {
+            if (markerOn == true) {
                 robotCfg.getMarker().goToPreset(RoverRuckusRobotCfg.MarkerPresets.RELEASE);
-                markerOn=false;
-            }
-            else if(markerOn==false){
+                markerOn = false;
+            } else if (markerOn == false) {
                 robotCfg.getMarker().goToPreset(RoverRuckusRobotCfg.MarkerPresets.HOLD);
-                markerOn=true;
+                markerOn = true;
 
             }
         }
-
-
 
 
         teleOpTimer.step("telemetry");
@@ -359,11 +344,11 @@ public class RoverRuckusTeleOp extends AbstractTeleOp<RoverRuckusRobotCfg>{
 
 //        telemetry.addData("rotationJoystick",rotationValue);
 
-        telemetry.addData("rotationSetPoint",robotCfg.getArm().getRotationSetPoint());
+        telemetry.addData("rotationSetPoint", robotCfg.getArm().getRotationSetPoint());
 //        telemetry.addData("a",robotCfg.getArm().getExponential());
-        telemetry.addData("rotationEncoder",robotCfg.getArm().getRotationEncoder());
-        telemetry.addData("extensionEncoder",robotCfg.getArm().getExtensionEncoder());
-        telemetry.addData("potentiomenterValue",robotCfg.getArm().getPotentiometerValue());
+        telemetry.addData("rotationEncoder", robotCfg.getArm().getRotationEncoder());
+        telemetry.addData("extensionEncoder", robotCfg.getArm().getExtensionEncoder());
+        telemetry.addData("potentiomenterValue", robotCfg.getArm().getPotentiometerValue());
 
 //        telemetry.addData("frontLeft",robotCfg.frontLeft.getEncoderPosition());
 //        telemetry.addData("frontRight",robotCfg.frontRight.getEncoderPosition());
@@ -371,10 +356,7 @@ public class RoverRuckusTeleOp extends AbstractTeleOp<RoverRuckusRobotCfg>{
 //        telemetry.addData("backRight",robotCfg.backRight.getEncoderPosition());
 
 
-
 //        telemetry.addData("rotationMaxValue",robotCfg.getArm().rotationMaxPosition);
-
-
 
 
         teleOpTimer.stop();
@@ -385,10 +367,12 @@ public class RoverRuckusTeleOp extends AbstractTeleOp<RoverRuckusRobotCfg>{
     protected void end() {
 
     }
-    double getRotationValue(){
+
+    double getRotationValue() {
         return rotationValue;
     }
-    double getExtensionValue(){
+
+    double getExtensionValue() {
         return extensionValue;
     }
 

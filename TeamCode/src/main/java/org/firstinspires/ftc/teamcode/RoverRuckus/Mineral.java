@@ -7,18 +7,32 @@ public class Mineral implements Comparable<Mineral>{
     private final double radius;
     private final float confidence;
     private final boolean isGold;
+    private GoldDetector.Detection type;
+    public Mineral(){
+        this.type=GoldDetector.Detection.NOTHING;
+        this.confidence = 0;
+        this.x = 0;
+        this.y = 0;
+        this.width = 0;
+        this.height = 0;
+        this.radius=0;
+        this.isGold=false;
+    }
 
 
     public Mineral(int x, int y, int width, int height,double radius,boolean isGold, float confidence) {
-
+        this.type=GoldDetector.Detection.NOTHING;
+        this.confidence = confidence;
         this.x = x;
         this.y = y;
         this.width = width;
         this.height = height;
         this.radius=radius;
         this.isGold=isGold;
-        this.confidence = confidence;
+
+
     }
+
 
     public int getX() {
         return x;
@@ -43,6 +57,11 @@ public class Mineral implements Comparable<Mineral>{
     public float getConfidence() {
         return confidence;
     }
+    public void setType(GoldDetector.Detection type){this.type=type;}
+    public GoldDetector.Detection getType(){return type;}
+    public String toString(){
+        return String.format("%s,%.3f,%d,%d,%d,%d,%.2f",this.type,this.confidence,this.x,this.y,this.width,this.height,this.radius);
+    };
 
     @Override
     public int compareTo(@NonNull Mineral another) {

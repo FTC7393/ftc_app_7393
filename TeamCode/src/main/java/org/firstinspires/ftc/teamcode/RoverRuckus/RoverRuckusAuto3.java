@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.RoverRuckus;
 
+import com.google.common.collect.ImmutableList;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
@@ -16,6 +17,7 @@ import ftc.electronvolts.statemachine.State;
 import ftc.electronvolts.statemachine.StateMachine;
 import ftc.electronvolts.statemachine.StateName;
 import ftc.electronvolts.util.BasicResultReceiver;
+import ftc.electronvolts.util.InputExtractor;
 import ftc.electronvolts.util.ResultReceiver;
 import ftc.electronvolts.util.TeamColor;
 import ftc.electronvolts.util.files.Logger;
@@ -33,6 +35,9 @@ public class RoverRuckusAuto3 extends AbstractAutoOp<RoverRuckusRobotCfg> {
     GoldDetector.Detection left;
     GoldDetector.Detection right;
     GoldDetector.Detection middle;
+    Mineral leftMineral=new Mineral();
+    Mineral rightMineral=new Mineral();
+    Mineral middleMineral=new Mineral();
     TeamColor teamColor;
     boolean isStartingDepot;
     boolean moveToOpponentCrater;
@@ -48,7 +53,37 @@ public class RoverRuckusAuto3 extends AbstractAutoOp<RoverRuckusRobotCfg> {
 
     @Override
     protected Logger createLogger() {
-        return null;
+
+
+        return new Logger("", "auto.csv",
+                new ImmutableList.Builder<Logger.Column>()
+                .add(new Logger.Column("State", new InputExtractor<StateName>() {
+
+                    @Override
+                    public StateName getValue() {
+                        return stateMachine.getCurrentStateName();
+                    }
+                }))
+                .add(new Logger.Column("Left Mineral,c,x,y,w,h,r", new InputExtractor<Mineral>() {
+                    @Override
+                    public Mineral getValue() {
+                        return leftMineral;
+                    }
+                }))
+                .add(new Logger.Column("Middle Mineral,c,x,y,w,h,r", new InputExtractor<Mineral>() {
+                    @Override
+                    public Mineral getValue() {
+                        return middleMineral;
+                    }
+                }))
+                .add(new Logger.Column("Right Mineral,c,x,y,w,h,r", new InputExtractor<Mineral>() {
+                    @Override
+                    public Mineral getValue() {
+                        return rightMineral;
+                    }
+                }))
+                        .build()
+        );
     }
 
 
@@ -68,6 +103,14 @@ public class RoverRuckusAuto3 extends AbstractAutoOp<RoverRuckusRobotCfg> {
         telemetry.addData("gyro", robotCfg.getGyro().getHeading());
         telemetry.addData("state", stateMachine.getCurrentStateName());
         telemetry.addData("goldPosition",goldPosition);
+        telemetry.addData("left",leftMineral.getType());
+        telemetry.addData("middle",middleMineral.getType());
+        telemetry.addData("right",rightMineral.getType());
+        telemetry.addData("leftMineral",leftMineral.toString());
+        telemetry.addData("rightMineral",rightMineral.toString());
+        telemetry.addData("middleMineral",middleMineral.toString());
+
+
 
     }
 
@@ -97,41 +140,39 @@ public class RoverRuckusAuto3 extends AbstractAutoOp<RoverRuckusRobotCfg> {
             directionDepot=-45;
 
         }
-        final ResultReceiver <GoldDetector.Detection> leftResultReceiver = new BasicResultReceiver<>();
-        final ResultReceiver <GoldDetector.Detection> middleResultReceiver = new BasicResultReceiver<>();
-        final ResultReceiver <GoldDetector.Detection> rightResultReceiver = new BasicResultReceiver<>();
+        final ResultReceiver <Mineral> mineralResultReceiver = new BasicResultReceiver<>();
 
-        final ResultReceiver<Boolean> notifyLeftResultReceiver=new BasicResultReceiver<>();
-        final ResultReceiver<Boolean> notifyMiddleResultReceiver=new BasicResultReceiver<>();
-        final ResultReceiver<Boolean> notifyRightResultReceiver=new BasicResultReceiver<>();
+        final ResultReceiver<Boolean> actResultReceiver=new BasicResultReceiver<>();
 
+        int numCycles = 3;
+        ObjectDetector.initThread(numCycles, telemetry,hardwareMap,mineralResultReceiver,actResultReceiver) ;
 
-
-        ObjectDetector.initThread(telemetry,hardwareMap,leftResultReceiver,notifyLeftResultReceiver) ;
-        //ObjectDetector.initThread(telemetry,hardwareMap,middleResultReceiver,notifyMiddleResultReceiver) ;
-        //ObjectDetector.initThread(telemetry,hardwareMap,rightResultReceiver,notifyRightResultReceiver) ;
-
-
-
-        EVStateMachineBuilder b = robotCfg.createEVStateMachineBuilder(S.UP_HANGING, teamColor, Angle.fromDegrees(3));
-        b.add(S.UP_HANGING, createDescendState(S.RELEASE_LATCH));
+        EVStateMachineBuilder b = robotCfg.createEVStateMachineBuilder(S.RELEASE_LATCH, teamColor, Angle.fromDegrees(3));
+//        b.add(S.UP_HANGING, createDescendState(S.RELEASE_LATCH));
         //b.add(S.UNLATCH_SERVO)
         //b.add(S.DRIVE-90DEGREES)
-        b.addServo(S.RELEASE_LATCH,S.DETECT_LEFT_GOLD,RoverRuckusRobotCfg.MainServoName.LATCH,RoverRuckusRobotCfg.LatchPresets.UNLATCH,true);
+        b.addServo(S.RELEASE_LATCH,S.MOVE_SERVO_LEFT_GOLD,RoverRuckusRobotCfg.MainServoName.LATCH,RoverRuckusRobotCfg.LatchPresets.UNLATCH,true);
+        b.addServo(S.MOVE_SERVO_LEFT_GOLD,S.DRIVE_CLOSER,RoverRuckusRobotCfg.MainServoName.PHONEPAN,RoverRuckusRobotCfg.PhonePanPresets.LEFT,1,true);
+        b.addDrive(S.DRIVE_CLOSER,S.WAIT_1,Distance.fromFeet(.225),.5,270,0);
+        b.addWait(S.WAIT_1,S.DETECT_LEFT_GOLD,3000);
+
 
         b.add(S.DETECT_LEFT_GOLD, new BasicAbstractState() {
             @Override
             public void init() {
-                notifyLeftResultReceiver.setValue(true);
-
+                actResultReceiver.setValue(true);
             }
 
             @Override
             public boolean isDone() {
+                if (mineralResultReceiver.isReady()) {
+                    leftMineral=mineralResultReceiver.getValue();
+                    left = leftMineral.getType();
+                    mineralResultReceiver.clear();
 
-                left=leftResultReceiver.getValue();
-
-                return leftResultReceiver.isReady();
+                    return true;
+                }
+                return false;
             }
 
             @Override
@@ -139,46 +180,58 @@ public class RoverRuckusAuto3 extends AbstractAutoOp<RoverRuckusRobotCfg> {
                 return S.MOVE_SERVO_MIDDLE_GOLD;
             }
         });
-        b.addServo(S.MOVE_SERVO_MIDDLE_GOLD,S.DETECT_MIDDLE_GOLD,RoverRuckusRobotCfg.MainServoName.PHONEPAN,RoverRuckusRobotCfg.PhonePanPresets.MIDDLE,1.0,true);
+        b.addServo(S.MOVE_SERVO_MIDDLE_GOLD,S.WAIT_2,RoverRuckusRobotCfg.MainServoName.PHONEPAN,RoverRuckusRobotCfg.PhonePanPresets.MIDDLE,1.0,true);
+        b.addWait(S.WAIT_2,S.DETECT_MIDDLE_GOLD,3000);
+
         b.add(S.DETECT_MIDDLE_GOLD, new BasicAbstractState() {
             @Override
             public void init() {
-                notifyMiddleResultReceiver.setValue(true);
-
-
+                actResultReceiver.setValue(true);
             }
 
             @Override
             public boolean isDone() {
+                if (mineralResultReceiver.isReady()) {
+                    middleMineral=mineralResultReceiver.getValue();
+                    middle = middleMineral.getType();
+                    mineralResultReceiver.clear();
 
-                middle=middleResultReceiver.getValue();
-                return middleResultReceiver.isReady();
+                    return true;
+                }
+                return false;
             }
 
             @Override
             public StateName getNextStateName() {
+
                 return S.MOVE_SERVO_RIGHT_GOLD;
             }
         });
-        b.addServo(S.MOVE_SERVO_RIGHT_GOLD,S.DETECT_RIGHT_GOLD,RoverRuckusRobotCfg.MainServoName.PHONEPAN,RoverRuckusRobotCfg.PhonePanPresets.RIGHT,1.0,true);
+        b.addServo(S.MOVE_SERVO_RIGHT_GOLD,S.WAIT_3,RoverRuckusRobotCfg.MainServoName.PHONEPAN,RoverRuckusRobotCfg.PhonePanPresets.RIGHT,1.0,true);
+        b.addWait(S.WAIT_3,S.DETECT_RIGHT_GOLD,3000);
+
         b.add(S.DETECT_RIGHT_GOLD, new BasicAbstractState() {
             @Override
             public void init() {
-                notifyRightResultReceiver.setValue(true);
-
-
+                actResultReceiver.setValue(true);
             }
 
             @Override
             public boolean isDone() {
+                if (mineralResultReceiver.isReady()) {
+                    rightMineral=mineralResultReceiver.getValue();
 
-                right=rightResultReceiver.getValue();
-                return rightResultReceiver.isReady();
+                    right = rightMineral.getType();
+                    mineralResultReceiver.clear();
+
+                    return true;
+                }
+                return false;
             }
 
             @Override
             public StateName getNextStateName() {
-                return S.DRIVE_LITTLE;
+                return S.STOP;
             }
         });
 
@@ -463,7 +516,7 @@ public class RoverRuckusAuto3 extends AbstractAutoOp<RoverRuckusRobotCfg> {
         DRIVE_DEPOT_MIDDLE, STRAFE_TO_CRATER, DEPOT_TURN, CRATER_TURN, CRATER_DRIVE,
         //ROTATE_UP,
         DETECT_LEFT_GOLD, DETECT_RIGHT_GOLD, MOVE_SERVO_MIDDLE_GOLD, DETECT_MIDDLE_GOLD,
-        MOVE_SERVO_LEFT_GOLD, MOVE_SERVO_RIGHT_GOLD, LEFT_DONT_HIT_GOLD_TURN
+        MOVE_SERVO_LEFT_GOLD, MOVE_SERVO_RIGHT_GOLD, DRIVE_CLOSER, WAIT_1, WAIT_2, WAIT_3, LEFT_DONT_HIT_GOLD_TURN
 
 
     }

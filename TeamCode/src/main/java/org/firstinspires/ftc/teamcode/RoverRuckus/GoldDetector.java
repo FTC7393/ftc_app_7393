@@ -60,13 +60,14 @@ public class GoldDetector {
 //        return new Logger("vision_log",".csv",);
 //    }
 
-    private final int maxWidth = 250;
-    private final int minWidth = 130;
+    private static final float MIN_CONFIDENCE = .55f;
+    private final int maxWidth = 180;
+    private final int minWidth = 80;
     private final int maxHeight = 250;
-    private final int minHeight = 100;
+    private final int minHeight = 90;
     private final int x1=320;
     private final int x2=960;
-    private final int y1=20;
+    private final int y1=-10;
     private final int y2=360;
 
     private final Rectangle centerFilter = new Rectangle(x1, x2, y1, y2);
@@ -85,25 +86,30 @@ public class GoldDetector {
     }
 
 
-    public Detection findPosition(Telemetry telemetry) {
+    public Mineral findPosition(Telemetry telemetry) {
         List<Mineral> list = filter(fullList, telemetry);
 
         if(list.size()>0){
             Mineral m1=list.get(0);
             if(m1.isGold()){
-                return Detection.GOLD;
+                m1.setType(Detection.GOLD);
+
 
 
             }
             else if(!m1.isGold()){
-                return Detection.SILVER;
+                m1.setType(Detection.SILVER);
+
 
             }
+            return m1;
 
 
         }
+        Mineral m1=new Mineral();
 
-        return Detection.NOTHING;
+
+        return m1;
 
 
     }
@@ -121,9 +127,9 @@ public class GoldDetector {
             int h = (int) r.getWidth(); // camera is sideways
             int w = (int) r.getHeight();
             //In our coordinate system, width  is height and height is width
-            double centerOfFilterX=(x1-x2)/2.;
+            double centerOfFilterX=(x2-x1)/2.;
             double centerOfBlockX=(x+.5*(w));
-            double centerOfFilterY=(y1-y2)/2.;
+            double centerOfFilterY=(y2-y1)/2.;
             double centerOfBlockY=(y+.5*(h));
 
             double sideX=centerOfFilterX-centerOfBlockX;
@@ -142,9 +148,10 @@ public class GoldDetector {
                 telemetry.addData("widthOK?", widthOK + " " + r.getHeight());
             }
 
-            if (insideFilterBox && heightOk && widthOK) {
-                b.add(new Mineral(x, y, w, h,radius,isGold, r.getConfidence()));
+            if (insideFilterBox && heightOk && widthOK &&(r.getConfidence()>MIN_CONFIDENCE)) {
+                b.add(new Mineral(x, y, w, h, radius, isGold, r.getConfidence()));
             }
+
         }
         Collections.sort(b);
 

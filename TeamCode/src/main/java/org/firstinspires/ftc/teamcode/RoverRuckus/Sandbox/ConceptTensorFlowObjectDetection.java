@@ -122,7 +122,7 @@ public class ConceptTensorFlowObjectDetection extends LinearOpMode {
                         telemetry.addData("# Object Detected", updatedRecognitions.size());
 
                         GoldDetector gd = new GoldDetector(updatedRecognitions);
-                        GoldDetector.Detection pos = gd.findPosition(telemetry);
+                        GoldDetector.Detection pos = null; // needs update gd.findPosition(telemetry);
                         telemetry.addData("Gold Position", pos.name());
 
 //                      if (updatedRecognitions.size() == 3) {

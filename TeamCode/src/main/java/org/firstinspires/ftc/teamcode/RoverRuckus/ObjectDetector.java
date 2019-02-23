@@ -48,7 +48,9 @@ public class ObjectDetector {
     }
 
 
-    public static void initThread(final Telemetry telemetry, final HardwareMap hardwareMap, final ResultReceiver<GoldDetector.Detection> goldPositionResultReceiver, final ResultReceiver<Boolean> actResultReceiver){
+    public static void initThread(final int numCycles, final Telemetry telemetry, final HardwareMap hardwareMap,
+                                  final ResultReceiver<Mineral> goldPositionResultReceiver,
+                                  final ResultReceiver<Boolean> actResultReceiver){
         final ObjectDetector objectDetector=new ObjectDetector(hardwareMap);
 
         //start the init in a new thread
@@ -58,23 +60,27 @@ public class ObjectDetector {
                 objectDetector.init();
                 int maxTries = 10;
                 int i = 0;
-                boolean isDone = false;
-                while (!isDone) {
+                int numCyclesDone = 0;
+                while (numCyclesDone < numCycles) {
                     if(actResultReceiver.isReady()&&actResultReceiver.getValue()) {
                         if(i>maxTries){
-                            goldPositionResultReceiver.setValue(GoldDetector.Detection.NOTHING);
-                            isDone=true;
+                            goldPositionResultReceiver.setValue(new Mineral());
+                            actResultReceiver.clear();
+                            i=0;
+                            numCyclesDone++;
                         }
                         else{
-                            GoldDetector.Detection detection = objectDetector.act();
+                            Mineral detection = objectDetector.act();
                             telemetry.addData("detection", detection);
                             telemetry.addData("i", i);
                             if (detection != null) {
-                                if(detection!=GoldDetector.Detection.NOTHING) {
-                                    goldPositionResultReceiver.setValue(detection);
-                                    isDone = true;
-                                }
                                 i++;
+                                if(detection.getType()!=GoldDetector.Detection.NOTHING) {
+                                    goldPositionResultReceiver.setValue(detection);
+                                    actResultReceiver.clear();
+                                    i=0;
+                                    numCyclesDone++;
+                                }
                             }
                         }
 
@@ -95,11 +101,11 @@ public class ObjectDetector {
         initTfod();
         tfod.activate();
     }
-    private GoldDetector.Detection act() {
+    private Mineral act() {
         List<Recognition> updatedRecognitions = tfod.getUpdatedRecognitions();
         if (updatedRecognitions != null) {
             GoldDetector gd = new GoldDetector(updatedRecognitions);
-            GoldDetector.Detection detection=gd.findPosition(null);
+            Mineral detection=gd.findPosition(null);
             return detection;
 
         }
@@ -112,4 +118,5 @@ public class ObjectDetector {
 
         tfod.shutdown();
     }
+
 }

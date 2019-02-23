@@ -217,8 +217,8 @@ public class RoverRuckusRobotCfg extends RobotCfg {
         RELEASE
     }
     public enum PhonePanPresets{
-        LEFT,
         MIDDLE,
+        LEFT,
         RIGHT
 
     }

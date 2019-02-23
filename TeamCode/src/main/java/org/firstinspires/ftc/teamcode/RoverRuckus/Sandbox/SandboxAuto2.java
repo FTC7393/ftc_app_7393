@@ -5,6 +5,7 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 
 import org.firstinspires.ftc.teamcode.RoverRuckus.GoldDetector;
 import org.firstinspires.ftc.teamcode.RoverRuckus.GoldPosition;
+import org.firstinspires.ftc.teamcode.RoverRuckus.Mineral;
 import org.firstinspires.ftc.teamcode.RoverRuckus.ObjectDetector;
 import org.firstinspires.ftc.teamcode.RoverRuckus.RoverRuckusOptionsOp;
 import org.firstinspires.ftc.teamcode.RoverRuckus.RoverRuckusRobotCfg;
@@ -27,15 +28,17 @@ import ftc.electronvolts.util.files.OptionsFile;
 import ftc.electronvolts.util.units.Angle;
 import ftc.electronvolts.util.units.Time;
 
+import static com.sun.tools.doclint.Entity.lt;
+
 @Autonomous(name = "Sandbox Auto 2")
 public class SandboxAuto2 extends AbstractAutoOp<RoverRuckusRobotCfg> {
     Gyro gyro;
     MecanumControl mecanumControl;
     double orientationDepot;
     double directionDepot;
-    ResultReceiver<GoldDetector.Detection> left;
-    ResultReceiver<GoldDetector.Detection> middle;
-    ResultReceiver<GoldDetector.Detection> right;
+    ResultReceiver<Mineral> left;
+    ResultReceiver<Mineral> middle;
+    ResultReceiver<Mineral> right;
     TeamColor teamColor;
     boolean isStartingDepot;
     boolean moveToOpponentCrater;
@@ -72,9 +75,24 @@ public class SandboxAuto2 extends AbstractAutoOp<RoverRuckusRobotCfg> {
     protected void act() {
         telemetry.addData("gyro", robotCfg.getGyro().getHeading());
         telemetry.addData("state", stateMachine.getCurrentStateName());
-        telemetry.addData("LEFT mineral:", left.getValue());
-        telemetry.addData("MID  mineral:", middle.getValue());
-        telemetry.addData("RGHT mineral:", right.getValue());
+        Mineral lm = left.getValue();
+        String ls="NA";
+        if (lm != null) {
+            ls = lm.getType() + " " + lm.getConfidence();
+        }
+        Mineral mm = middle.getValue();
+        String ms="NA";
+        if (mm != null) {
+            ms = mm.getType() + " " + mm.getConfidence();
+        }
+        Mineral rm = right.getValue();
+        String rs="NA";
+        if (rm != null) {
+            rs = rm.getType() + " " + rm.getConfidence();
+        }
+        telemetry.addData("LEFT mineral:", ls);
+        telemetry.addData("MID  mineral:", ms);
+        telemetry.addData("RGHT mineral:", rs);
         telemetry.addData("goldPosition",goldPosition);
     }
 
@@ -117,7 +135,7 @@ public class SandboxAuto2 extends AbstractAutoOp<RoverRuckusRobotCfg> {
         right = new BasicResultReceiver<>();
 
 
-        final ResultReceiver<GoldDetector.Detection> mineralResultReceiver = new BasicResultReceiver<>();
+        final ResultReceiver<Mineral> mineralResultReceiver = new BasicResultReceiver<>();
         final ResultReceiver<Boolean> cameraActionNotifier = new BasicResultReceiver<>();
         int numCycles = 3;
         ObjectDetector.initThread(numCycles, telemetry, hardwareMap, mineralResultReceiver, cameraActionNotifier);
@@ -142,7 +160,7 @@ public class SandboxAuto2 extends AbstractAutoOp<RoverRuckusRobotCfg> {
         return b.build();
     }
 
-    private State getLookState(final ResultReceiver<Boolean> cameraActor, final ResultReceiver<GoldDetector.Detection> goldRR, final StateName next, final ResultReceiver<GoldDetector.Detection> posDetRR) {
+    private State getLookState(final ResultReceiver<Boolean> cameraActor, final ResultReceiver<Mineral> goldRR, final StateName next, final ResultReceiver<Mineral> posDetRR) {
         return new BasicAbstractState() {
 
             @Override
@@ -153,7 +171,6 @@ public class SandboxAuto2 extends AbstractAutoOp<RoverRuckusRobotCfg> {
             @Override
             public boolean isDone() {
                 if (goldRR.isReady()) {
-                    posDetRR.setValue(goldRR.getValue());
                     goldRR.clear();
                     return true;
                 }
