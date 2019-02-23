@@ -73,7 +73,7 @@ public class SandboxAuto2 extends AbstractAutoOp<RoverRuckusRobotCfg> {
 
     @Override
     protected void act() {
-        telemetry.addData("gyro", robotCfg.getGyro().getHeading());
+        telemetry.addData("gyro ", robotCfg.getGyro().getHeading());
         telemetry.addData("state", stateMachine.getCurrentStateName());
         Mineral lm = left.getValue();
         String ls="NA";
