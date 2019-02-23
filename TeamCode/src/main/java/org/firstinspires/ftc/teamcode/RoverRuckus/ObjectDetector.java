@@ -56,37 +56,37 @@ public class ObjectDetector {
             @Override
             public void run() {
                 objectDetector.init();
-                    int maxTries = 10;
-                    int i = 0;
-                    boolean isDone = false;
-                    while (!isDone) {
-                        if(actResultReceiver.isReady()&&actResultReceiver.getValue()) {
-                            if(i>maxTries){
-                                goldPositionResultReceiver.setValue(GoldDetector.Detection.NOTHING);
-                                isDone=true;
-                            }
-                            else{
-                                GoldDetector.Detection detection = objectDetector.act();
-                                telemetry.addData("detection", detection);
-                                telemetry.addData("i", i);
-                                if (detection != null) {
-                                    if(detection!=GoldDetector.Detection.NOTHING) {
-                                        goldPositionResultReceiver.setValue(detection);
-                                        isDone = true;
-                                    }
-                                    i++;
+                int maxTries = 10;
+                int i = 0;
+                boolean isDone = false;
+                while (!isDone) {
+                    if(actResultReceiver.isReady()&&actResultReceiver.getValue()) {
+                        if(i>maxTries){
+                            goldPositionResultReceiver.setValue(GoldDetector.Detection.NOTHING);
+                            isDone=true;
+                        }
+                        else{
+                            GoldDetector.Detection detection = objectDetector.act();
+                            telemetry.addData("detection", detection);
+                            telemetry.addData("i", i);
+                            if (detection != null) {
+                                if(detection!=GoldDetector.Detection.NOTHING) {
+                                    goldPositionResultReceiver.setValue(detection);
+                                    isDone = true;
                                 }
+                                i++;
                             }
+                        }
 
-                        }
-                        try {
-                            Thread.sleep(100);
-                        } catch (InterruptedException e) {
-                            // Should this cause the thread to exit?
-                        }
                     }
-                    objectDetector.end();
+                    try {
+                        Thread.sleep(100);
+                    } catch (InterruptedException e) {
+                        // Should this cause the thread to exit?
                     }
+                }
+                objectDetector.end();
+            }
 
         }).start();
     }
@@ -97,13 +97,13 @@ public class ObjectDetector {
     }
     private GoldDetector.Detection act() {
         List<Recognition> updatedRecognitions = tfod.getUpdatedRecognitions();
-            if (updatedRecognitions != null) {
-                GoldDetector gd = new GoldDetector(updatedRecognitions);
-                GoldDetector.Detection detection=gd.findPosition(null);
-                return detection;
+        if (updatedRecognitions != null) {
+            GoldDetector gd = new GoldDetector(updatedRecognitions);
+            GoldDetector.Detection detection=gd.findPosition(null);
+            return detection;
 
-            }
-            return null;
+        }
+        return null;
     }
 
     private void end()

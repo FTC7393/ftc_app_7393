@@ -72,7 +72,7 @@ public class GoldDetector {
     private final Rectangle centerFilter = new Rectangle(x1, x2, y1, y2);
 
     private final List<Recognition> fullList;
-    enum Detection{
+    public enum Detection{
         GOLD,
         SILVER,
         NOTHING
