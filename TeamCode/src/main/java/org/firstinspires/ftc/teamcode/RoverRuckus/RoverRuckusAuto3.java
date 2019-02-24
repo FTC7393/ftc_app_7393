@@ -4,6 +4,17 @@ import com.google.common.collect.ImmutableList;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.io.PrintStream;
+import java.io.PrintWriter;
+import java.nio.charset.Charset;
+import java.util.List;
+
 import evlib.hardware.control.MecanumControl;
 import evlib.hardware.sensors.Gyro;
 import evlib.opmodes.AbstractAutoOp;
@@ -41,9 +52,29 @@ public class RoverRuckusAuto3 extends AbstractAutoOp<RoverRuckusRobotCfg> {
     TeamColor teamColor;
     boolean isStartingDepot;
     boolean moveToOpponentCrater;
-    double wait;
+
+    final ResultReceiver<List<Mineral>> potentialMineralResultReceiver = new BasicResultReceiver<>();
 
     GoldPosition goldPosition;
+
+//    static PrintStream mineralLogOutputter = null;
+//    public static PrintStream getMineralLogWriter() {
+//        if (mineralLogOutputter == null) {
+//            String fname = String.format("%d_%s", System.currentTimeMillis(), "mineral_log.csv");
+//
+//            File dir = FileUtil.getLogsDir();
+//            File logFile = new File(dir, fname);
+//            try {
+//                Charset UTF8 = Charset.forName("UTF-8");
+//                mineralLogOutputter = new PrintStream(new FileOutputStream(logFile));
+//
+//            } catch (IOException e) {
+//                throw new RuntimeException("Error - can't open log file: " + e.getMessage());
+//            }
+//        }
+//        return mineralLogOutputter;
+//
+//    }
 
 
     @Override
@@ -100,15 +131,22 @@ public class RoverRuckusAuto3 extends AbstractAutoOp<RoverRuckusRobotCfg> {
 
     @Override
     protected void act() {
+        if (potentialMineralResultReceiver.isReady()) {
+            List<Mineral> mlist = potentialMineralResultReceiver.getValue();
+            for (Mineral m : mlist) {
+                m.showInTelem(telemetry);
+            }
+        }
+
         telemetry.addData("gyro", robotCfg.getGyro().getHeading());
         telemetry.addData("state", stateMachine.getCurrentStateName());
         telemetry.addData("goldPosition",goldPosition);
         telemetry.addData("left",leftMineral.getType());
         telemetry.addData("middle",middleMineral.getType());
         telemetry.addData("right",rightMineral.getType());
-        telemetry.addData("leftMineral",leftMineral.toString());
-        telemetry.addData("rightMineral",rightMineral.toString());
-        telemetry.addData("middleMineral",middleMineral.toString());
+//        telemetry.addData("leftMineral",leftMineral.toString());
+//        telemetry.addData("rightMineral",rightMineral.toString());
+//        telemetry.addData("middleMineral",middleMineral.toString());
 
 
 
@@ -120,11 +158,15 @@ public class RoverRuckusAuto3 extends AbstractAutoOp<RoverRuckusRobotCfg> {
 
     @Override
     protected void end() {
-
+//        mineralLogOutputter.close();
+//        mineralLogOutputter = null;
     }
 
     @Override
     public StateMachine buildStates() {
+        double panSpeed = 0.2;
+        double wait= 0.5;
+
         OptionsFile optionsFile = new OptionsFile(EVConverters.getInstance(), FileUtil.getOptionsFile(RoverRuckusOptionsOp.FILENAME));
 
 
@@ -145,16 +187,41 @@ public class RoverRuckusAuto3 extends AbstractAutoOp<RoverRuckusRobotCfg> {
         final ResultReceiver<Boolean> actResultReceiver=new BasicResultReceiver<>();
 
         int numCycles = 3;
-        ObjectDetector.initThread(numCycles, telemetry,hardwareMap,mineralResultReceiver,actResultReceiver) ;
+        ObjectDetector.initThread(numCycles, telemetry,hardwareMap,mineralResultReceiver,actResultReceiver, potentialMineralResultReceiver) ;
 
-        EVStateMachineBuilder b = robotCfg.createEVStateMachineBuilder(S.RELEASE_LATCH, teamColor, Angle.fromDegrees(3));
-//        b.add(S.UP_HANGING, createDescendState(S.RELEASE_LATCH));
-        //b.add(S.UNLATCH_SERVO)
-        //b.add(S.DRIVE-90DEGREES)
-        b.addServo(S.RELEASE_LATCH,S.MOVE_SERVO_LEFT_GOLD,RoverRuckusRobotCfg.MainServoName.LATCH,RoverRuckusRobotCfg.LatchPresets.UNLATCH,true);
-        b.addServo(S.MOVE_SERVO_LEFT_GOLD,S.DRIVE_CLOSER,RoverRuckusRobotCfg.MainServoName.PHONEPAN,RoverRuckusRobotCfg.PhonePanPresets.LEFT,1,true);
-        b.addDrive(S.DRIVE_CLOSER,S.WAIT_1,Distance.fromFeet(.225),.5,270,0);
-        b.addWait(S.WAIT_1,S.DETECT_LEFT_GOLD,3000);
+        EVStateMachineBuilder b = robotCfg.createEVStateMachineBuilder(S.DESCEND, teamColor, Angle.fromDegrees(3));
+        double descentTime = 5.0;
+        b.add(S.DESCEND, createDescendState(S.RELEASE_LATCH, descentTime));
+        b.addServo(S.RELEASE_LATCH,S.WAIT_2,RoverRuckusRobotCfg.MainServoName.LATCH,RoverRuckusRobotCfg.LatchPresets.UNLATCH,true);
+        b.addWait(S.WAIT_2, S.DETECT_MIDDLE_GOLD, Time.fromSeconds(1.5));
+        b.add(S.DETECT_MIDDLE_GOLD, new BasicAbstractState() {
+            @Override
+            public void init() {
+                actResultReceiver.setValue(true);
+            }
+
+            @Override
+            public boolean isDone() {
+                if (mineralResultReceiver.isReady()) {
+                    middleMineral=mineralResultReceiver.getValue();
+                    middle = middleMineral.getType();
+                    mineralResultReceiver.clear();
+
+                    return true;
+                }
+                return false;
+            }
+
+            @Override
+            public StateName getNextStateName() {
+
+                return S.DRIVE_CLOSER;
+            }
+        });
+
+        b.addDrive(S.DRIVE_CLOSER,S.MOVE_SERVO_LEFT_GOLD,Distance.fromFeet(.30),.5,270,0);
+        b.addServo(S.MOVE_SERVO_LEFT_GOLD,S.WAIT_1,RoverRuckusRobotCfg.MainServoName.PHONEPAN,RoverRuckusRobotCfg.PhonePanPresets.LEFT,panSpeed,true);
+        b.addWait(S.WAIT_1,S.DETECT_LEFT_GOLD,Time.fromSeconds(wait));
 
 
         b.add(S.DETECT_LEFT_GOLD, new BasicAbstractState() {
@@ -177,38 +244,11 @@ public class RoverRuckusAuto3 extends AbstractAutoOp<RoverRuckusRobotCfg> {
 
             @Override
             public StateName getNextStateName() {
-                return S.MOVE_SERVO_MIDDLE_GOLD;
-            }
-        });
-        b.addServo(S.MOVE_SERVO_MIDDLE_GOLD,S.WAIT_2,RoverRuckusRobotCfg.MainServoName.PHONEPAN,RoverRuckusRobotCfg.PhonePanPresets.MIDDLE,1.0,true);
-        b.addWait(S.WAIT_2,S.DETECT_MIDDLE_GOLD,3000);
-
-        b.add(S.DETECT_MIDDLE_GOLD, new BasicAbstractState() {
-            @Override
-            public void init() {
-                actResultReceiver.setValue(true);
-            }
-
-            @Override
-            public boolean isDone() {
-                if (mineralResultReceiver.isReady()) {
-                    middleMineral=mineralResultReceiver.getValue();
-                    middle = middleMineral.getType();
-                    mineralResultReceiver.clear();
-
-                    return true;
-                }
-                return false;
-            }
-
-            @Override
-            public StateName getNextStateName() {
-
                 return S.MOVE_SERVO_RIGHT_GOLD;
             }
         });
-        b.addServo(S.MOVE_SERVO_RIGHT_GOLD,S.WAIT_3,RoverRuckusRobotCfg.MainServoName.PHONEPAN,RoverRuckusRobotCfg.PhonePanPresets.RIGHT,1.0,true);
-        b.addWait(S.WAIT_3,S.DETECT_RIGHT_GOLD,3000);
+        b.addServo(S.MOVE_SERVO_RIGHT_GOLD,S.WAIT_3,RoverRuckusRobotCfg.MainServoName.PHONEPAN,RoverRuckusRobotCfg.PhonePanPresets.RIGHT,panSpeed,true);
+        b.addWait(S.WAIT_3,S.DETECT_RIGHT_GOLD,Time.fromSeconds(wait));
 
         b.add(S.DETECT_RIGHT_GOLD, new BasicAbstractState() {
             @Override
@@ -231,11 +271,11 @@ public class RoverRuckusAuto3 extends AbstractAutoOp<RoverRuckusRobotCfg> {
 
             @Override
             public StateName getNextStateName() {
-                return S.STOP;
+                return S.EXTRA_WAIT;
             }
         });
 
-
+        b.addWait(S.EXTRA_WAIT, S.STOP, Time.fromSeconds(15));
 
 
 
@@ -440,7 +480,7 @@ public class RoverRuckusAuto3 extends AbstractAutoOp<RoverRuckusRobotCfg> {
         return b.build();
     }
 
-    private State createDescendState(final StateName nextStateName) {
+    private State createDescendState(final StateName nextStateName, final double descentTimeSec) {
         return new BasicAbstractState() {
             private ElapsedTime runtime = new ElapsedTime();
 
@@ -452,7 +492,7 @@ public class RoverRuckusAuto3 extends AbstractAutoOp<RoverRuckusRobotCfg> {
             @Override
             public boolean isDone() {
                 boolean doneHanging=false;
-                if (!robotCfg.getHanging().islatchLimitPressed()&&runtime.seconds() < 6.0) {
+                if (!robotCfg.getHanging().islatchLimitPressed()&&runtime.seconds() < descentTimeSec) {
 //                        robotCfg.getMecanumControl().setRotationControl(RotationControls.ZERO);
 //                        robotCfg.getMecanumControl().setTranslationControl(TranslationControls.constant(.2, Angle.fromDegrees(270)));
 
@@ -488,7 +528,7 @@ public class RoverRuckusAuto3 extends AbstractAutoOp<RoverRuckusRobotCfg> {
         MOVE_FROM_LANDER,
         TURN_CRATER_AGAIN,
         DRIVE_TO_DEPOT_MORE,
-        UP_HANGING,
+        DESCEND,
         DOWN_HANGING,
         UNLATCH,
         LOCK_ROTATION,
@@ -515,8 +555,10 @@ public class RoverRuckusAuto3 extends AbstractAutoOp<RoverRuckusRobotCfg> {
         STARTING_DEPOT_LEFT, DEPOT_TURN_RIGHT, DEPOT_TURN_LEFT, STARTING_DEPOT_MIDDLE,
         DRIVE_DEPOT_MIDDLE, STRAFE_TO_CRATER, DEPOT_TURN, CRATER_TURN, CRATER_DRIVE,
         //ROTATE_UP,
-        DETECT_LEFT_GOLD, DETECT_RIGHT_GOLD, MOVE_SERVO_MIDDLE_GOLD, DETECT_MIDDLE_GOLD,
-        MOVE_SERVO_LEFT_GOLD, MOVE_SERVO_RIGHT_GOLD, DRIVE_CLOSER, WAIT_1, WAIT_2, WAIT_3, LEFT_DONT_HIT_GOLD_TURN
+       DETECT_LEFT_GOLD, DETECT_RIGHT_GOLD, DETECT_MIDDLE_GOLD,
+        MOVE_SERVO_LEFT_GOLD, MOVE_SERVO_RIGHT_GOLD, DRIVE_CLOSER, WAIT_1, WAIT_2, WAIT_3, LEFT_DONT_HIT_GOLD_TURN,
+        EXTRA_WAIT;
+
 
 
     }

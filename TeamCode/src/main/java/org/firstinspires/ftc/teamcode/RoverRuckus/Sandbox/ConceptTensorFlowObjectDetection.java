@@ -41,8 +41,12 @@ import org.firstinspires.ftc.robotcore.external.tfod.Recognition;
 import org.firstinspires.ftc.robotcore.external.tfod.TFObjectDetector;
 import org.firstinspires.ftc.teamcode.RoverRuckus.GoldDetector;
 import org.firstinspires.ftc.teamcode.RoverRuckus.GoldPosition;
+import org.firstinspires.ftc.teamcode.RoverRuckus.Mineral;
 
 import java.util.List;
+
+import ftc.electronvolts.util.BasicResultReceiver;
+import ftc.electronvolts.util.ResultReceiver;
 
 /**
  * Copied from the supplied code to test the Vuforia / Tensor code stuff
@@ -89,6 +93,9 @@ public class ConceptTensorFlowObjectDetection extends LinearOpMode {
      */
     private TFObjectDetector tfod;
 
+    final ResultReceiver<List<Mineral>> potentialMineralResultReceiver = new BasicResultReceiver<>();
+
+
     @Override
     public void runOpMode() {
         // The TFObjectDetector uses the camera frames from the VuforiaLocalizer, so we create that
@@ -121,9 +128,8 @@ public class ConceptTensorFlowObjectDetection extends LinearOpMode {
                     if (updatedRecognitions != null) {
                         telemetry.addData("# Object Detected", updatedRecognitions.size());
 
-                        GoldDetector gd = new GoldDetector(updatedRecognitions);
-                        GoldDetector.Detection pos = null; // needs update gd.findPosition(telemetry);
-                        telemetry.addData("Gold Position", pos.name());
+                        Mineral m = GoldDetector.findPosition(updatedRecognitions, telemetry, potentialMineralResultReceiver);
+                        m.showInTelem(telemetry);
 
 //                      if (updatedRecognitions.size() == 3) {
 //                        int goldMineralX = -1;

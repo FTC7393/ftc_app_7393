@@ -62,10 +62,12 @@ public class ObjectDetectorTest {
 
     private final TfodManagerTest tfodMgr;
     private final Telemetry telemetry;
+    private final ResultReceiver<List<Mineral>> potentialItemsRR;
 
-    public ObjectDetectorTest(HardwareMap hardwareMap, Telemetry telemetry) {
+    public ObjectDetectorTest(HardwareMap hardwareMap, Telemetry telemetry, ResultReceiver<List<Mineral>> potentialItemsRR) {
         tfodMgr = new TfodManagerTest(hardwareMap);
         this.telemetry = telemetry;
+        this.potentialItemsRR = potentialItemsRR;
     }
     public void init() {
         tfodMgr.init();
@@ -76,9 +78,10 @@ public class ObjectDetectorTest {
 
         public static void initThread(final int numCycles,
                                   final Telemetry telemetry, final HardwareMap hardwareMap,
-                                  final ResultReceiver<GoldDetector.Detection> goldPositionResultReceiver,
-                                  final ResultReceiver<Boolean> actResultReceiver) {
-        final ObjectDetectorTest objectDetector = new ObjectDetectorTest(hardwareMap, telemetry);
+                                  final ResultReceiver<Mineral> goldPositionResultReceiver,
+                                  final ResultReceiver<Boolean> actResultReceiver,
+                                      ResultReceiver<List<Mineral>> potentialItemsRR) {
+        final ObjectDetectorTest objectDetector = new ObjectDetectorTest(hardwareMap, telemetry, potentialItemsRR);
         //start the init in a new thread
         new Thread(new Runnable() {
             @Override
@@ -93,17 +96,17 @@ public class ObjectDetectorTest {
                 while (numCyclesDone < numCycles) {
                     if (actResultReceiver.isReady() && actResultReceiver.getValue()) {
                         if (i > maxTries) {
-                            goldPositionResultReceiver.setValue(GoldDetector.Detection.NOTHING);
+                            goldPositionResultReceiver.setValue(new Mineral());
                             actResultReceiver.clear();
                             i=0;
                             numCyclesDone++;
                         } else {
-                            GoldDetector.Detection detection = objectDetector.act();
+                            Mineral detection = objectDetector.act();
                             telemetry.addData("detection", detection);
                             telemetry.addData("i", i);
                             if (detection != null) {
                                 i++;
-                                if (detection != GoldDetector.Detection.NOTHING) {
+                                if (detection.getType() != GoldDetector.Detection.NOTHING) {
                                     goldPositionResultReceiver.setValue(detection);
                                     actResultReceiver.clear();
                                     i=0;
@@ -125,11 +128,10 @@ public class ObjectDetectorTest {
         }).start();
     }
 
-    public GoldDetector.Detection act() {
+    public Mineral act() {
         List<Recognition> updatedRecognitions = tfodMgr.getTfod().getUpdatedRecognitions();
         if (updatedRecognitions != null) {
-            GoldDetector gd = new GoldDetector(updatedRecognitions);
-            GoldDetector.Detection detection = null; // needs update // gd.findPosition(telemetry);
+            Mineral detection = GoldDetector.findPosition(updatedRecognitions,telemetry, potentialItemsRR);
             return detection;
         }
         return null;

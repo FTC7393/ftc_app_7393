@@ -1,8 +1,11 @@
 package org.firstinspires.ftc.teamcode.RoverRuckus;
 
+import com.google.common.collect.ImmutableList;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.util.ElapsedTime;
+
+import java.util.List;
 
 import evlib.hardware.control.MecanumControl;
 import evlib.hardware.sensors.Gyro;
@@ -30,15 +33,16 @@ public class RoverRuckusAutoTest extends AbstractAutoOp<RoverRuckusRobotCfg> {
     MecanumControl mecanumControl;
     double orientationDepot;
     double directionDepot;
-    GoldDetector.Detection left;
-    GoldDetector.Detection right;
-    GoldDetector.Detection middle;
+    Mineral left;
+    Mineral right;
+    Mineral middle;
     TeamColor teamColor;
     boolean isStartingDepot;
     boolean moveToOpponentCrater;
     double wait;
 
     GoldPosition goldPosition;
+    final ResultReceiver<List<Mineral>> potentialMineralResultReceiver = new BasicResultReceiver<>();
 
 
     @Override
@@ -68,7 +72,6 @@ public class RoverRuckusAutoTest extends AbstractAutoOp<RoverRuckusRobotCfg> {
         telemetry.addData("gyro", robotCfg.getGyro().getHeading());
         telemetry.addData("state", stateMachine.getCurrentStateName());
         telemetry.addData("goldPosition",goldPosition);
-
     }
 
 
@@ -105,7 +108,7 @@ public class RoverRuckusAutoTest extends AbstractAutoOp<RoverRuckusRobotCfg> {
 //        final ResultReceiver<Boolean> notifyMiddleResultReceiver=new BasicResultReceiver<>();
 //        final ResultReceiver<Boolean> notifyRightResultReceiver=new BasicResultReceiver<>();
 
-        final ResultReceiver <GoldDetector.Detection> mineralResultReceiver = new BasicResultReceiver<>();
+        final ResultReceiver <Mineral> mineralResultReceiver = new BasicResultReceiver<>();
         final ResultReceiver <Boolean> cameraActionNotifier = new BasicResultReceiver<>();
 
 
@@ -114,7 +117,7 @@ public class RoverRuckusAutoTest extends AbstractAutoOp<RoverRuckusRobotCfg> {
 //        ObjectDetector.initThread(false, true, telemetry,hardwareMap,rightResultReceiver,notifyRightResultReceiver) ;
 
         int numCycles = 3;
-        ObjectDetectorTest.initThread(numCycles, telemetry,hardwareMap,mineralResultReceiver, cameraActionNotifier);
+        ObjectDetectorTest.initThread(numCycles, telemetry,hardwareMap,mineralResultReceiver, cameraActionNotifier, potentialMineralResultReceiver);
 
 
         EVStateMachineBuilder b = robotCfg.createEVStateMachineBuilder(S.UP_HANGING, teamColor, Angle.fromDegrees(3));
@@ -209,17 +212,42 @@ public class RoverRuckusAutoTest extends AbstractAutoOp<RoverRuckusRobotCfg> {
             public StateName getNextStateName() {
                 StateName postGoldStateName;
 
-                if(left==GoldDetector.Detection.GOLD&&right!=GoldDetector.Detection.GOLD&&middle!=GoldDetector.Detection.GOLD){
-                    goldPosition=GoldPosition.LEFT;
+                GoldDetector.Detection ld = left.getType();
+                GoldDetector.Detection md = middle.getType();
+                GoldDetector.Detection rd = right.getType();
+                GoldDetector.Detection G = GoldDetector.Detection.GOLD;
+                GoldDetector.Detection SLVR = GoldDetector.Detection.SILVER;
+                GoldDetector.Detection U = GoldDetector.Detection.NOTHING;
+
+                List<GoldDetector.Detection> allDetections = ImmutableList.of(ld, md, rd);
+                List<GoldPosition> allPositions = ImmutableList.of(GoldPosition.LEFT, GoldPosition.MIDDLE, GoldPosition.RIGHT);
+                int n = allDetections.size();
+                int numSilvers = 0;
+                int numUnknowns = 0;
+                goldPosition = null;
+                GoldPosition unknownPosition = null;
+                for (int i=0; i<n; i++) {
+                    GoldDetector.Detection d = allDetections.get(i);
+                    // use the last gold found
+                    if (d == G) {
+                        goldPosition = allPositions.get(i);
+                    }
+                    if (d == SLVR) {
+                        numSilvers++;
+                    }
+                    if (d == U) {
+                        unknownPosition = allPositions.get(i);
+                    }
                 }
-                else if(left!=GoldDetector.Detection.GOLD&&right==GoldDetector.Detection.GOLD&&middle!=GoldDetector.Detection.GOLD){
-                    goldPosition=GoldPosition.RIGHT;
+                if (goldPosition == null) {
+                    // There are no gold.
+                    if (numSilvers == 2) {
+                        // With no gols, and two silvers, choose the last must be unknown - choose that one.
+                        goldPosition = unknownPosition;
+                    }
                 }
-                else if(left!=GoldDetector.Detection.GOLD&&right!=GoldDetector.Detection.GOLD&&middle==GoldDetector.Detection.GOLD){
-                    goldPosition=GoldPosition.MIDDLE;
-                }
-                else{
-                    goldPosition=GoldPosition.UNKNOWN;
+                if (goldPosition == null) {
+                    goldPosition = GoldPosition.MIDDLE;
                 }
 
 

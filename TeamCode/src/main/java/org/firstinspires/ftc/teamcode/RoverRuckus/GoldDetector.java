@@ -6,119 +6,68 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.tfod.Recognition;
 
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.PrintStream;
+import java.io.PrintWriter;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 
+import evlib.util.FileUtil;
 import ftc.electronvolts.util.BasicResultReceiver;
 import ftc.electronvolts.util.InputExtractor;
 import ftc.electronvolts.util.ResultReceiver;
 import ftc.electronvolts.util.files.Logger;
 
 public class GoldDetector {
-//    String
-//    Logger createLogger(){
-//        String prefix = "sandbox_log";
-//        String postfix = ".txt";
-//        ImmutableList.Builder<Logger.Column> cols = ImmutableList.builder();
-//        cols = ImmutableList.of(
-//                new Logger.Column("gyro", new InputExtractor<Double>() {
-//                    @Override
-//                    public Double getValue() {
-//                        return gyro.getHeading();
-//                    }
-//                }),
-//                new Logger.Column("velocityR", new InputExtractor<Double>() {
-//                    @Override
-//                    public Double getValue() {
-//                        return mecanumControl.getVelocityR();
-//                    }
-//                }),
-//                new Logger.Column("Motor 0", new InputExtractor<Double>() {
-//                    @Override
-//                    public Double getValue() {
-//                        return mecanumControl.getMecanumMotors().getValue(0);
-//                    }
-//                }),
-//                new Logger.Column("Tolerance", new InputExtractor<Double>() {
-//                    @Override
-//                    public Double getValue() {
-//                        return EVEndConditions.toleranceLog ;
-//                    }
-//                }  ),
-//                new Logger.Column("Separation", new InputExtractor<Double>() {
-//                    @Override
-//                    public Double getValue() {
-//                        return EVEndConditions.separationLog ;
-//                    }
-//                }
-//
-//                ));
-//
-//
-//
-//        return new Logger("vision_log",".csv",);
-//    }
 
-    private static final float MIN_CONFIDENCE = .55f;
-    private final int maxWidth = 180;
-    private final int minWidth = 80;
-    private final int maxHeight = 250;
-    private final int minHeight = 90;
-    private final int x1=320;
-    private final int x2=960;
-    private final int y1=-10;
-    private final int y2=360;
-
-    private final Rectangle centerFilter = new Rectangle(x1, x2, y1, y2);
-
-    private final List<Recognition> fullList;
     public enum Detection{
         GOLD,
         SILVER,
         NOTHING
     }
 
+    private static final float MIN_CONFIDENCE = .35f;
+    private final static int maxWidth = 225;
+    private final static int minWidth = 80;
+    private final static int maxHeight = 320;
+    private final static int minHeight = 90;
+    private final static int x1=400; //320;
+    private final static int x2=840; // 960;
+    private final static int y1=-40;
+    private final static int y2= 380; // 360;
 
+    private final static Rectangle centerFilter = new Rectangle(x1, x2, y1, y2);
 
-    public GoldDetector(List<Recognition> fullList) {
-        this.fullList = fullList;
-    }
-
-
-    public Mineral findPosition(Telemetry telemetry) {
-        List<Mineral> list = filter(fullList, telemetry);
+    public static Mineral findPosition(List<Recognition> fullList, Telemetry telemetry, ResultReceiver<List<Mineral>> potentialItemRR) {
+        List<Mineral> list = filter(fullList, telemetry, potentialItemRR);
 
         if(list.size()>0){
             Mineral m1=list.get(0);
             if(m1.isGold()){
                 m1.setType(Detection.GOLD);
-
-
-
             }
             else if(!m1.isGold()){
                 m1.setType(Detection.SILVER);
-
-
             }
             return m1;
-
-
         }
         Mineral m1=new Mineral();
 
-
         return m1;
-
-
     }
 
 
 
 
-    private List<Mineral> filter(List<Recognition> fullList, Telemetry telemetry) {
-        List<Mineral> b = new ArrayList<>();
+    private static List<Mineral> filter(List<Recognition> fullList, Telemetry telemetry, ResultReceiver<List<Mineral>> potentialItemRR) {
+        List<Mineral> filteredMinerals = new ArrayList<>();
+        List<Mineral> allMinerals = new ArrayList<>();
         int c=0;
         for (Recognition r : fullList) {
             int x = 1280 - (int) r.getBottom();
@@ -140,22 +89,32 @@ public class GoldDetector {
             boolean heightOk = (h < maxHeight) && (h > minHeight);
             boolean widthOK = (w < maxWidth) && (w > minWidth);
 
+            Mineral m = new Mineral(x, y, w, h, radius, isGold, r.getConfidence(),c++,insideFilterBox,heightOk,widthOK);
             if (telemetry != null) {
-                telemetry.addData("X" + c, x);
-                telemetry.addData("Y" + (c++), y);
-                telemetry.addData("inside", insideFilterBox);
-                telemetry.addData("hieghtOK?", heightOk + " " + r.getWidth());
-                telemetry.addData("widthOK?", widthOK + " " + r.getHeight());
+                m.showInTelem(telemetry);
             }
 
-            if (insideFilterBox && heightOk && widthOK &&(r.getConfidence()>MIN_CONFIDENCE)) {
-                b.add(new Mineral(x, y, w, h, radius, isGold, r.getConfidence()));
+            allMinerals.add(m);
+            boolean isIn = false;
+//            if (insideFilterBox) { // && heightOk && widthOK &&(r.getConfidence()>MIN_CONFIDENCE)) {
+            if((centerOfBlockX > 320) && (centerOfBlockX < 960)) {
+                filteredMinerals.add(m);
+                isIn = true;
             }
+//            log(m, isIn);
 
         }
-        Collections.sort(b);
-
-        return ImmutableList.copyOf(b);
+        Collections.sort(filteredMinerals);
+        Collections.sort(allMinerals);
+        potentialItemRR.setValue(allMinerals);
+        return ImmutableList.copyOf(filteredMinerals);
     }
+
+    // Temp method to write mineral data to a file as it is discoverede
+//    private static synchronized void log(Mineral m, boolean isIn) {
+//        PrintStream pw = RoverRuckusAuto3.getMineralLogWriter();
+//        long millis = System.currentTimeMillis();
+//        pw.printf("%d,%s,%d\n",millis,m.toStringExtended(),isIn?1:0);
+//    }
 }
 

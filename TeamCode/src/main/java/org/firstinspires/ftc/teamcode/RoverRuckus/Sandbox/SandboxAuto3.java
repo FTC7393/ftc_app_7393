@@ -4,9 +4,12 @@ import com.google.common.collect.ImmutableList;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 
 import org.firstinspires.ftc.teamcode.RoverRuckus.GoldPosition;
+import org.firstinspires.ftc.teamcode.RoverRuckus.Mineral;
 import org.firstinspires.ftc.teamcode.RoverRuckus.ObjectDetectorTest;
 import org.firstinspires.ftc.teamcode.RoverRuckus.RoverRuckusOptionsOp;
 import org.firstinspires.ftc.teamcode.RoverRuckus.RoverRuckusRobotCfg;
+
+import java.util.List;
 
 import evlib.hardware.control.MecanumControl;
 import evlib.hardware.sensors.Gyro;
@@ -33,6 +36,7 @@ public class SandboxAuto3 extends AbstractAutoOp<RoverRuckusRobotCfg> {
     MecanumControl mecanumControl;
 
     GoldPosition goldPosition;
+    final ResultReceiver<List<Mineral>> potentialMineralResultReceiver = new BasicResultReceiver<>();
 
 
     @Override
@@ -82,7 +86,7 @@ public class SandboxAuto3 extends AbstractAutoOp<RoverRuckusRobotCfg> {
 
         TeamColor teamColor = TeamColor.RED;
         EVStateMachineBuilder b = robotCfg.createEVStateMachineBuilder(S.OBSERVE, teamColor, Angle.fromDegrees(3));
-        final ObjectDetectorTest objDetector = new ObjectDetectorTest(hardwareMap, telemetry);
+        final ObjectDetectorTest objDetector = new ObjectDetectorTest(hardwareMap, telemetry, potentialMineralResultReceiver);
         b.add(S.OBSERVE, new BasicAbstractState() {
             MatchTimer timer;
             @Override

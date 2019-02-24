@@ -12,8 +12,6 @@ import org.firstinspires.ftc.robotcore.external.tfod.TFObjectDetector;
 
 import java.util.List;
 
-import ftc.electronvolts.util.BasicResultReceiver;
-import ftc.electronvolts.util.InputExtractor;
 import ftc.electronvolts.util.ResultReceiver;
 import ftc.electronvolts.util.files.Logger;
 
@@ -50,7 +48,9 @@ public class ObjectDetector {
 
     public static void initThread(final int numCycles, final Telemetry telemetry, final HardwareMap hardwareMap,
                                   final ResultReceiver<Mineral> goldPositionResultReceiver,
-                                  final ResultReceiver<Boolean> actResultReceiver){
+                                  final ResultReceiver<Boolean> actResultReceiver,
+                                  final ResultReceiver<List<Mineral>> potentialItemRR
+                                  ){
         final ObjectDetector objectDetector=new ObjectDetector(hardwareMap);
 
         //start the init in a new thread
@@ -58,7 +58,7 @@ public class ObjectDetector {
             @Override
             public void run() {
                 objectDetector.init();
-                int maxTries = 10;
+                int maxTries = 7;
                 int i = 0;
                 int numCyclesDone = 0;
                 while (numCyclesDone < numCycles) {
@@ -70,7 +70,7 @@ public class ObjectDetector {
                             numCyclesDone++;
                         }
                         else{
-                            Mineral detection = objectDetector.act();
+                            Mineral detection = objectDetector.act(telemetry, potentialItemRR);
                             telemetry.addData("detection", detection);
                             telemetry.addData("i", i);
                             if (detection != null) {
@@ -101,13 +101,11 @@ public class ObjectDetector {
         initTfod();
         tfod.activate();
     }
-    private Mineral act() {
+    private Mineral act(Telemetry telemetry, ResultReceiver<List<Mineral>> potentialItemRR) {
         List<Recognition> updatedRecognitions = tfod.getUpdatedRecognitions();
         if (updatedRecognitions != null) {
-            GoldDetector gd = new GoldDetector(updatedRecognitions);
-            Mineral detection=gd.findPosition(null);
+            Mineral detection=GoldDetector.findPosition(updatedRecognitions, telemetry, potentialItemRR);
             return detection;
-
         }
         return null;
     }

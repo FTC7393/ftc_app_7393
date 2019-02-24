@@ -10,6 +10,8 @@ import org.firstinspires.ftc.teamcode.RoverRuckus.ObjectDetector;
 import org.firstinspires.ftc.teamcode.RoverRuckus.RoverRuckusOptionsOp;
 import org.firstinspires.ftc.teamcode.RoverRuckus.RoverRuckusRobotCfg;
 
+import java.util.List;
+
 import evlib.hardware.control.MecanumControl;
 import evlib.hardware.sensors.Gyro;
 import evlib.opmodes.AbstractAutoOp;
@@ -42,7 +44,8 @@ public class SandboxAuto2 extends AbstractAutoOp<RoverRuckusRobotCfg> {
     TeamColor teamColor;
     boolean isStartingDepot;
     boolean moveToOpponentCrater;
-    double wait;
+
+    final ResultReceiver<List<Mineral>> potentialMineralResultReceiver = new BasicResultReceiver<>();
 
     GoldPosition goldPosition;
 
@@ -73,7 +76,13 @@ public class SandboxAuto2 extends AbstractAutoOp<RoverRuckusRobotCfg> {
 
     @Override
     protected void act() {
-        telemetry.addData("gyro ", robotCfg.getGyro().getHeading());
+//        telemetry.addData("gyro ", robotCfg.getGyro().getHeading());
+//        if (potentialMineralResultReceiver.isReady()) {
+//            List<Mineral> mlist = potentialMineralResultReceiver.getValue();
+//            for (Mineral m : mlist) {
+//                m.showInTelem(telemetry);
+//            }
+//        }
         telemetry.addData("state", stateMachine.getCurrentStateName());
         Mineral lm = left.getValue();
         String ls="NA";
@@ -138,7 +147,7 @@ public class SandboxAuto2 extends AbstractAutoOp<RoverRuckusRobotCfg> {
         final ResultReceiver<Mineral> mineralResultReceiver = new BasicResultReceiver<>();
         final ResultReceiver<Boolean> cameraActionNotifier = new BasicResultReceiver<>();
         int numCycles = 3;
-        ObjectDetector.initThread(numCycles, telemetry, hardwareMap, mineralResultReceiver, cameraActionNotifier);
+        ObjectDetector.initThread(numCycles, telemetry, hardwareMap, mineralResultReceiver, cameraActionNotifier, potentialMineralResultReceiver);
 
 
         EVStateMachineBuilder b = robotCfg.createEVStateMachineBuilder(S.PAN_LEFT, teamColor, Angle.fromDegrees(3));
@@ -146,14 +155,14 @@ public class SandboxAuto2 extends AbstractAutoOp<RoverRuckusRobotCfg> {
         RoverRuckusRobotCfg.PhonePanPresets psLeft = RoverRuckusRobotCfg.PhonePanPresets.LEFT;
         RoverRuckusRobotCfg.PhonePanPresets psMid = RoverRuckusRobotCfg.PhonePanPresets.MIDDLE;
         RoverRuckusRobotCfg.PhonePanPresets psRight = RoverRuckusRobotCfg.PhonePanPresets.RIGHT;
-        int pauseTime = 3;
-        b.addServo(S.PAN_LEFT, S.PAUSE1, panServo, psLeft, 1.0, true);
+        int pauseTime = 1;
+        b.addServo(S.PAN_LEFT, S.PAUSE1, panServo, psLeft, 0.15, true);
         b.addWait(S.PAUSE1, S.LOOK_FOR_GOLD_LEFT, Time.fromSeconds(pauseTime));
         b.add(S.LOOK_FOR_GOLD_LEFT, getLookState(cameraActionNotifier, mineralResultReceiver, S.PAN_MID,left));
-        b.addServo(S.PAN_MID, S.PAUSE2, panServo, psMid, 1.0, true);
+        b.addServo(S.PAN_MID, S.PAUSE2, panServo, psMid, 0.15, true);
         b.addWait(S.PAUSE2, S.LOOK_FOR_GOLD_MIDDLE, Time.fromSeconds(pauseTime));
         b.add(S.LOOK_FOR_GOLD_MIDDLE, getLookState(cameraActionNotifier, mineralResultReceiver, S.PAN_RIGHT,middle));
-        b.addServo(S.PAN_RIGHT, S.PAUSE3, panServo, psRight, 1.0, true);
+        b.addServo(S.PAN_RIGHT, S.PAUSE3, panServo, psRight, 0.15, true);
         b.addWait(S.PAUSE3, S.LOOK_FOR_GOLD_RIGHT, Time.fromSeconds(pauseTime));
         b.add(S.LOOK_FOR_GOLD_RIGHT, getLookState(cameraActionNotifier, mineralResultReceiver, S.STOP,right));
         b.addStop(S.STOP);
@@ -171,6 +180,7 @@ public class SandboxAuto2 extends AbstractAutoOp<RoverRuckusRobotCfg> {
             @Override
             public boolean isDone() {
                 if (goldRR.isReady()) {
+                    posDetRR.setValue(goldRR.getValue());
                     goldRR.clear();
                     return true;
                 }
