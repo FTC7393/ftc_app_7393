@@ -47,7 +47,7 @@ public class Arm {
    // int dumpRotationPosition=600;
 
     int dumpSilverExtensionPosition = 1596;
-    int dumpGoldExtensionPosition = 1985+204;
+    int dumpGoldExtensionPosition = 1985+204-100;
     int collectExtensionPosition = 1985;
     int stowExtensionPosition = 0;
 
@@ -57,7 +57,7 @@ public class Arm {
     double potentiometerMinPosition=0.99;
 
     double rotationVerticalPosition=4.85;
-    double rotationGoldPosition =2.47;
+    double rotationGoldPosition =2.57;
     double rotationSilverPosition =2.33;
     double potentiometerMaxPosition=2.70;
     double rotationFastZoneMin=1.3;
@@ -213,7 +213,7 @@ public class Arm {
         if(potentiometerValue > rotationFastZoneMin && potentiometerValue < rotationFastZoneMax) {
             rotationSetPoint = rotationSetPoint + 80*(-y);
         } else {
-            rotationSetPoint = rotationSetPoint + 70*(-y);
+            rotationSetPoint = rotationSetPoint + 76*(-y);
         }
 
     }

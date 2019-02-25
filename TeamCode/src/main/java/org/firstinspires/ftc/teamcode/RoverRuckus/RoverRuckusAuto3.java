@@ -190,7 +190,7 @@ public class RoverRuckusAuto3 extends AbstractAutoOp<RoverRuckusRobotCfg> {
         ObjectDetector.initThread(numCycles, telemetry,hardwareMap,mineralResultReceiver,actResultReceiver, potentialMineralResultReceiver) ;
 
         EVStateMachineBuilder b = robotCfg.createEVStateMachineBuilder(S.DESCEND, teamColor, Angle.fromDegrees(3));
-        double descentTime = 5.0;
+        double descentTime = 6.0;
         b.add(S.DESCEND, createDescendState(S.RELEASE_LATCH, descentTime));
         b.addServo(S.RELEASE_LATCH,S.WAIT_2,RoverRuckusRobotCfg.MainServoName.LATCH,RoverRuckusRobotCfg.LatchPresets.UNLATCH,true);
         b.addWait(S.WAIT_2, S.DETECT_MIDDLE_GOLD, Time.fromSeconds(1.5));
@@ -271,21 +271,13 @@ public class RoverRuckusAuto3 extends AbstractAutoOp<RoverRuckusRobotCfg> {
 
             @Override
             public StateName getNextStateName() {
-                return S.EXTRA_WAIT;
+                return S.CHOOSE_POSITION;
             }
         });
 
-        b.addWait(S.EXTRA_WAIT, S.STOP, Time.fromSeconds(15));
-
-
-
-        b.addDrive(S.DRIVE_LITTLE,S.CHOOSE_POSITION,Distance.fromFeet(.2),.5,270,0);
-
         b.add(S.CHOOSE_POSITION, new BasicAbstractState() {
             @Override
-            public void init() {
-
-            }
+            public void init() { }
 
             @Override
             public boolean isDone() {
@@ -311,80 +303,70 @@ public class RoverRuckusAuto3 extends AbstractAutoOp<RoverRuckusRobotCfg> {
 
 
                 if(goldPosition==GoldPosition.LEFT){
-
-                    postGoldStateName=S.LEFT_GOLD;
+                    postGoldStateName=S.DLG_BRANCH_START;
                 }
                 else if(goldPosition==GoldPosition.MIDDLE||goldPosition==GoldPosition.UNKNOWN){
-                    postGoldStateName=S.MIDDLE_GOLD;
-
-
-
+                    postGoldStateName=S.DMG_BRANCH_START;
                 }
                 else{
                     //the only other option is right position
-                    postGoldStateName=S.RIGHT_GOLD;
-
+                    postGoldStateName=S.DRG_BRANCH_START;
                 }
                 return postGoldStateName;
             }
         });
 
 
-        //middle
-//        b.add(S.ROTATE_UP, new BasicAbstractState() {
-//            double extension=0;
-//            double rotation=1;
-//            boolean done=false;
+//        b.add(S.STARTING_DEPOT_MIDDLE, new BasicAbstractState() {
+//            StateName depot;
 //            @Override
-//            public void init() {
-//
-//            }
-//
+//            public void init() { }
 //            @Override
 //            public boolean isDone() {
-//                while(!robotCfg.getArm().autoUse(extension,rotation)){
-//                    done=false;
-//
-//                }
-//                done =true;
-//
-//
-//
-//                return done;
+//                return true;
 //            }
-//
 //            @Override
 //            public StateName getNextStateName() {
-//                return S.STOP;
+//                if(isStartingDepot){
+//                    depot=S.DRIVE_TO_DEPOT_MORE;
+//                }
+//                else{
+//                    depot=S.DRIVE_DEPOT_MIDDLE;
+//                }
+//                return depot;
 //            }
 //        });
-        b.addWait(S.MIDDLE_GOLD,S.STARTING_DEPOT_MIDDLE,0);
-        b.add(S.STARTING_DEPOT_MIDDLE, new BasicAbstractState() {
-            StateName depot;
-            @Override
-            public void init() {
-
-            }
-
-            @Override
-            public boolean isDone() {
-                return true;
-            }
-
-            @Override
-            public StateName getNextStateName() {
-                if(isStartingDepot){
-                    depot=S.DRIVE_TO_DEPOT_MORE;
 
 
-                }
-                else{
-                    depot=S.DRIVE_DEPOT_MIDDLE;
-                }
-                return depot;
-            }
-        });
-//        b.addDrive(S.DRIVE_DEPOT_MIDDLE,S.CRATER_TURN,Distance.fromFeet(3),.5,270,270);
+
+
+
+
+
+// one way handle options op level decisions
+//        if (isStartingDepot) {
+//            buildDepotStateMachine(b);
+//        } else {
+//            return buildCraterSM(b);
+//        }
+
+        b.addWait(S.DMG_BRANCH_START,S.DMG_STRAFFE_1,0);
+        b.addDrive(S.DMG_STRAFFE_1, S.STOP,Distance.fromFeet(5),.5,270,0);
+        //  b.add()
+        // b.add(S.NAME, S.NEST-join state))
+
+
+
+
+        b.addWait(S.DLG_BRANCH_START,S.DLG_STRAFFE_1,0);
+        b.addDrive(S.DLG_STRAFFE_1, S.STOP,Distance.fromFeet(1.4),.5,305,0);
+
+
+        b.addWait(S.DRG_BRANCH_START,S.DRG_STRAFFE_1,0);
+        b.addDrive(S.DRG_STRAFFE_1, S.STOP,Distance.fromFeet(1.4),.5,225 ,0);
+
+
+
         b.addGyroTurn(S.DRIVE_DEPOT_MIDDLE,S.STRAFE_TO_CRATER,0, 0.5); // turn back to original dirn
         b.addDrive(S.STRAFE_TO_CRATER,S.STOP,Distance.fromFeet(1.5),.5,270,0);
 
@@ -477,6 +459,8 @@ public class RoverRuckusAuto3 extends AbstractAutoOp<RoverRuckusRobotCfg> {
         // to go towards the other crater is 135 degrees; note - the gain on the gyro on the gyro control needs adjusting to keep it from
         b.addStop(S.STOP);
 
+
+
         return b.build();
     }
 
@@ -539,8 +523,6 @@ public class RoverRuckusAuto3 extends AbstractAutoOp<RoverRuckusRobotCfg> {
         DETECT_GOLD,
         STOP,
         GOLD_ALIGN,
-        DRIVE_TO_DEPOT,
-        DRIVE_LITTLE,
         DRIVE_TO_CRATER, RELEASE_LATCH
         ,LEFT_GOLD_FORWARD,
         LEFT_GOLD_TO_MIDDLE,
@@ -557,8 +539,9 @@ public class RoverRuckusAuto3 extends AbstractAutoOp<RoverRuckusRobotCfg> {
         //ROTATE_UP,
        DETECT_LEFT_GOLD, DETECT_RIGHT_GOLD, DETECT_MIDDLE_GOLD,
         MOVE_SERVO_LEFT_GOLD, MOVE_SERVO_RIGHT_GOLD, DRIVE_CLOSER, WAIT_1, WAIT_2, WAIT_3, LEFT_DONT_HIT_GOLD_TURN,
-        EXTRA_WAIT;
-
+        DLG_BRANCH_START,DMG_BRANCH_START,DRG_BRANCH_START,
+        DLG_STRAFFE_1,DMG_STRAFFE_1,DRG_STRAFFE_1
+        ;
 
 
     }
