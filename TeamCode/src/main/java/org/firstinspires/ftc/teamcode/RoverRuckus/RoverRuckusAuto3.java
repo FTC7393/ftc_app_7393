@@ -359,15 +359,15 @@ public class RoverRuckusAuto3 extends AbstractAutoOp<RoverRuckusRobotCfg> {
         b.addDrive(S.D_BACKUP_2, S.D_TURN_CRATER, Distance.fromFeet(.2),.5,90,270);
         if (moveToOpponentCrater) {
             b.addGyroTurn(S.D_TURN_CRATER,S.D_OPP_DRIVE_1,45, 0.5);
-            b.addDrive(S.D_OPP_DRIVE_1,S.D_OPP_DRIVE_2,Distance.fromFeet(.5),.5,315,45);
+            b.addDrive(S.D_OPP_DRIVE_1,S.D_OPP_DRIVE_2,Distance.fromFeet(.65),.5,315,45);
             b.addDrive(S.D_OPP_DRIVE_2,S.D_OPP_DRIVE_3,Distance.fromFeet(.1),.1,135,45);
             b.addDrive(S.D_OPP_DRIVE_3,S.STOP,Distance.fromFeet(8),1,45,45);
         }
         else {
             b.addGyroTurn(S.D_TURN_CRATER,S.D_OUR_DRIVE_1,135, 0.5);
-            b.addDrive(S.D_OUR_DRIVE_1,S.D_OUR_DRIVE_2,Distance.fromFeet(.5),.5,225,135);
+            b.addDrive(S.D_OUR_DRIVE_1,S.D_OUR_DRIVE_2,Distance.fromFeet(.65),.5,225,135);
             b.addDrive(S.D_OUR_DRIVE_2,S.D_OUR_DRIVE_3,Distance.fromFeet(.1),.5,45,135);
-            b.addDrive(S.D_OUR_DRIVE_3,S.STOP,Distance.fromFeet(6),1,135,135);
+            b.addDrive(S.D_OUR_DRIVE_3,S.STOP,Distance.fromFeet(8),1,135,135);
         }
 
 
