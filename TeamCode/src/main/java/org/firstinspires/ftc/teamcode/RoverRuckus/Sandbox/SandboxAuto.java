@@ -39,7 +39,9 @@ public class SandboxAuto extends AbstractAutoOp<RoverRuckusRobotCfg> {
         EVStateMachineBuilder b = new EVStateMachineBuilder(S.DRIVE1, TeamColor.RED, Angle.fromRadians(0.05),
                 robotCfg.getGyro(), fg, servos, robotCfg.getMecanumControl());
         Distance dist;
-        b.addDrive(S.DRIVE1, S.TURN1, Distance.fromFeet(3), 0.75, Angle.fromDegrees(90), Angle.fromDegrees(0));
+        b.addDrive(S.DRIVE1, S.STOP,Distance.fromFeet(.5),.5,270,0);
+
+        // b.addDrive(S.DRIVE1, S.TURN1, Distance.fromFeet(3), 0.75, Angle.fromDegrees(90), Angle.fromDegrees(0));
         b.addGyroTurn(S.TURN1, S.STOP, 90,.1);
 //        b.addDrive(S.DRIVE2, S.STOP, Distance.fromFeet(4), 0.35, Angle.fromDegrees(180), Angle.fromDegrees(180));
 
