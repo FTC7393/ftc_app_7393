@@ -174,8 +174,31 @@ public class RoverRuckusRobotCfg extends RobotCfg {
                 public Double getValue() {
                     return getArm().getPotentiometerValue();
                     }
+                }),
+                new Logger.Column("VeloxityX",new InputExtractor<Double>() {
+                    @Override
+                    public Double getValue() {
+                        return getMecanumControl().getVelocityX();
+                    }
+                }),
+                new Logger.Column("VeloxityY",new InputExtractor<Double>() {
+                    @Override
+                    public Double getValue() {
+                        return getMecanumControl().getVelocityY();
+                    }
+                }),new Logger.Column("VeloxityR",new InputExtractor<Double>() {
+                    @Override
+                    public Double getValue() {
+                        return getMecanumControl().getVelocityR();
+                    }
                 })
-//                new Logger.Column("Extension Limit Switch",new InputExtractor<Boolean>() {
+
+
+
+//
+//
+//
+// new Logger.Column("Extension Limit Switch",new InputExtractor<Boolean>() {
 //                    @Override
 //                    public Boolean getValue() {
 //                        return getArm().getExtensionLimitSwitch();
