@@ -37,7 +37,7 @@ public class MineralDecisionMaker {
         map.put("UUS","M");
     }
     public GoldPosition decidePosition(GoldDetector.Detection left, GoldDetector.Detection middle, GoldDetector.Detection right) {
-        String key = getLetter(left)+getLetter(right)+getLetter(middle);
+        String key = getLetter(left)+getLetter(middle)+getLetter(right);
         String position = map.get(key);
         if (position == "L") {
             return GoldPosition.LEFT;
