@@ -162,6 +162,7 @@ public class RoverRuckusAuto3 extends AbstractAutoOp<RoverRuckusRobotCfg> {
         teamColor = TeamColor.RED;
         isStartingDepot=optionsFile.get(RoverRuckusOptionsOp.isStartingDepot,RoverRuckusOptionsOp.isStartingDepotDefault);
         moveToOpponentCrater=optionsFile.get(RoverRuckusOptionsOp.moveToOpponentCrater,RoverRuckusOptionsOp.moveToOpponentCraterDefault);
+        boolean doPartnerSample = true; //this needs to be in the options op
         if(!moveToOpponentCrater){
             orientationDepot=-45;
             directionDepot=-135;
@@ -315,7 +316,7 @@ public class RoverRuckusAuto3 extends AbstractAutoOp<RoverRuckusRobotCfg> {
 
 // one way handle options op level decisions
         if (isStartingDepot) {
-            buildDepotStateMachine(b, moveToOpponentCrater);
+            buildDepotStateMachine(b, moveToOpponentCrater, doPartnerSample);
         } else {
             buildCraterSM(b, moveToOpponentCrater);
         }
@@ -370,7 +371,7 @@ public class RoverRuckusAuto3 extends AbstractAutoOp<RoverRuckusRobotCfg> {
 
     }
 
-    private void buildDepotStateMachine(EVStateMachineBuilder b, boolean moveToOpponentCrater) {
+    private void buildDepotStateMachine(EVStateMachineBuilder b, boolean moveToOpponentCrater, boolean doPartnerSample) {
         //This is the depot side auto with gold detected in the middle
         b.addWait(S.DMG_BRANCH_START,S.DMG_STRAFFE_1,0);
         b.addDrive(S.DMG_STRAFFE_1, S.D_BACKUP_1,Distance.fromFeet(1.95),.5,270,0);
@@ -393,7 +394,7 @@ public class RoverRuckusAuto3 extends AbstractAutoOp<RoverRuckusRobotCfg> {
         b.addDrive(S.DRG_STRAFE_5, S.DRG_TURN_1,Distance.fromFeet(.2),.5,90 ,0);
         b.addGyroTurn(S.DRG_TURN_1, S.D_DROP_MARKER,270, .5);
 
-//this is common across all branches for depot
+        //this is common across all branches for depot
         b.addServo(S.D_DROP_MARKER, S.D_WAIT_1,RoverRuckusRobotCfg.MainServoName.MARKER,RoverRuckusRobotCfg.MarkerPresets.RELEASE,true);
         b.addWait(S.D_WAIT_1, S.D_BACKUP_2, Time.fromSeconds(0.5));
         b.addDrive(S.D_BACKUP_2, S.D_CLOSE_SERVO, Distance.fromFeet(.5),.5,90,270);
@@ -408,7 +409,19 @@ public class RoverRuckusAuto3 extends AbstractAutoOp<RoverRuckusRobotCfg> {
             b.addGyroTurn(S.D_TURN_CRATER,S.D_OUR_DRIVE_1,135, 0.5);
             b.addDrive(S.D_OUR_DRIVE_1,S.D_OUR_DRIVE_2,Distance.fromFeet(.65),.5,225,135);
             b.addDrive(S.D_OUR_DRIVE_2,S.D_OUR_DRIVE_3,Distance.fromFeet(.03),.5,45,135);
-            b.addDrive(S.D_OUR_DRIVE_3,S.STOP,Distance.fromFeet(8),.8,135,135);
+            b.addDrive(S.D_OUR_DRIVE_3,S.D_SAMPLE_DECISION,Distance.fromFeet(8),.8,135,135);
+            if(doPartnerSample) {
+                b.add(S.D_SAMPLE_DECISION, decideSample(S.SAMPLE_PARTNER, S.STOP));
+                b.addDrive(S.SAMPLE_PARTNER, S.SP_DRIVE_1,Distance.fromFeet(0.3),0.5,45,225);
+                b.addDrive(S.SP_DRIVE_1, S.SP_DRIVE_2,Distance.fromFeet(0.5),0.5,135,225);
+                b.addDrive(S.SP_DRIVE_2, S.STOP,Distance.fromFeet(0.8),0.5,270,225);
+            }
+            else {
+                b.addWait(S.D_SAMPLE_DECISION,S.STOP,0);
+            }
+
+
+
         }
 
 
@@ -418,6 +431,27 @@ public class RoverRuckusAuto3 extends AbstractAutoOp<RoverRuckusRobotCfg> {
         b.addDrive(S.DRIVE_TO_DEPOT_MORE,S.DRIVE_TO_DEPOT_BACK,Distance.fromFeet(5),.5,270,-90);
         b.addDrive(S.DRIVE_TO_DEPOT_BACK,S.TURN_CRATER_AGAIN,Distance.fromFeet(.25),.5,90,-90);
 
+    }
+
+    private State decideSample(final StateName keepGoingState, final StateName endState) {
+        return new BasicAbstractState() {
+            @Override
+            public void init() {
+
+            }
+
+            @Override
+            public boolean isDone() {
+                return true;
+            }
+
+            @Override
+            public StateName getNextStateName() {
+                if(goldPosition == GoldPosition.LEFT)
+                    return keepGoingState;
+                return endState;
+            }
+        };
     }
 
     private State createDescendState(final StateName nextStateName, final double descentTimeSec) {
@@ -506,7 +540,8 @@ public class RoverRuckusAuto3 extends AbstractAutoOp<RoverRuckusRobotCfg> {
         DLG_DRIVE_1, DLG_DRIVE_2, DLG_DRIVE_4, DLG_TURN_2,
         DRG_TURN_1, DRG_STRAFE_5, DRG_STRAFE_4, DRG_STRAFE_3, CMG_DRIVE_2, CMG_DRIVE_3, C_TURN_1,
         CLG_DRIVE_1, CLG_DRIVE_2, CLG_DRIVE_3, CRG_DRIVE_1, CRG_DRIVE_2, CRG_DRIVE_3, C_DRIVE_1,
-        C_DRIVE_2, C_DRIVE_3, C_DROP_MARKER, C_WAIT_1, C_DRIVE_4, C_DRIVE_6, C_TURN_3, C_TURN_2, C_DRIVE_5, C_DRIVE_6A, C_DRIVE_6B, D_CLOSE_SERVO, DRG_STRAFE_2
+        C_DRIVE_2, C_DRIVE_3, C_DROP_MARKER, C_WAIT_1, C_DRIVE_4, C_DRIVE_6, C_TURN_3, C_TURN_2,
+        C_DRIVE_5, C_DRIVE_6A, C_DRIVE_6B, D_CLOSE_SERVO, D_SAMPLE_DECISION, SAMPLE_PARTNER, SP_DRIVE_1, SP_DRIVE_2, DRG_STRAFE_2
 
 
     }
