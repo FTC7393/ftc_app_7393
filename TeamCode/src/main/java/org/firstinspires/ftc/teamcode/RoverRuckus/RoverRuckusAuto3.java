@@ -387,9 +387,9 @@ public class RoverRuckusAuto3 extends AbstractAutoOp<RoverRuckusRobotCfg> {
         //gold on right side for depot
         b.addWait(S.DRG_BRANCH_START,S.DRG_STRAFFE_1,0);
         b.addDrive(S.DRG_STRAFFE_1, S.DRG_STRAFE_2,Distance.fromFeet(1.8),.5,225 ,0);
-        b.addDrive(S.DRG_STRAFE_2, S.DRG_STRAFE_3,Distance.fromFeet(.3),.5,270 ,0);
-        b.addDrive(S.DRG_STRAFE_3, S.DRG_STRAFE_4,Distance.fromFeet(1.8),.5,315 ,0);
-        b.addDrive(S.DRG_STRAFE_4, S.DRG_STRAFE_5,Distance.fromFeet(.5),.5,270 ,0);
+        b.addDrive(S.DRG_STRAFE_2, S.DRG_STRAFE_3,Distance.fromFeet(.2),.5,270 ,0);
+        b.addDrive(S.DRG_STRAFE_3, S.DRG_STRAFE_4,Distance.fromFeet(1.4),.5,315 ,0);
+        b.addDrive(S.DRG_STRAFE_4, S.DRG_STRAFE_5,Distance.fromFeet(.3),.5,270 ,0);
         b.addDrive(S.DRG_STRAFE_5, S.DRG_TURN_1,Distance.fromFeet(.2),.5,90 ,0);
         b.addGyroTurn(S.DRG_TURN_1, S.D_DROP_MARKER,270, .5);
 
