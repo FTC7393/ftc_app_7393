@@ -327,11 +327,47 @@ public class RoverRuckusAuto3 extends AbstractAutoOp<RoverRuckusRobotCfg> {
 
     private void buildCraterSM(EVStateMachineBuilder b, boolean moveToOpponentCrater) {
         b.addWait(S.CMG_BRANCH_START,S.CMG_STRAFFE_1,0);
-        b.addDrive(S.CMG_STRAFFE_1, S.STOP,Distance.fromFeet(2),.5,270,0);
+        b.addDrive(S.CMG_STRAFFE_1, S.CMG_DRIVE_2,Distance.fromFeet(1),.5,270,0);
+        b.addDrive(S.CMG_DRIVE_2, S.CMG_DRIVE_3,Distance.fromFeet(.6),.5,90,0);
+        b.addDrive(S.CMG_DRIVE_3, S.C_TURN_1,Distance.fromFeet(2),.5,0,0);
 
         b.addWait(S.CLG_BRANCH_START,S.CLG_STRAFFE_1,0);
+        b.addDrive(S.CLG_DRIVE_1, S.CLG_DRIVE_2,Distance.fromFeet(1.6),.5,305,0);
+        b.addDrive(S.CLG_DRIVE_2, S.CLG_DRIVE_3,Distance.fromFeet(.6),.5,90,0);
+        b.addDrive(S.CLG_DRIVE_3, S.C_TURN_1,Distance.fromFeet(1),.5,0,0);
+
 
         b.addWait(S.CRG_BRANCH_START,S.CRG_STRAFFE_1,0);
+        b.addDrive(S.CRG_DRIVE_1, S.CRG_DRIVE_2,Distance.fromFeet(1.6),.5,225,0);
+        b.addDrive(S.CRG_DRIVE_2, S.CRG_DRIVE_3,Distance.fromFeet(.6),.5,90,0);
+        b.addDrive(S.CRG_DRIVE_3, S.C_TURN_1,Distance.fromFeet(3),.5,0,0);
+
+
+
+        //Common for crater from now until end on method
+
+        b.addGyroTurn(S.C_TURN_1,S.C_DRIVE_1, 45,.5);
+        b.addDrive(S.C_DRIVE_1,S.C_DRIVE_2,Distance.fromFeet(.3),.5,315,45);
+        b.addDrive(S.C_DRIVE_2,S.C_DRIVE_3,Distance.fromFeet(.2),.5,135,45);
+        b.addDrive(S.C_DRIVE_3,S.C_DROP_MARKER,Distance.fromFeet(5),.9,45,45);
+        b.addServo(S.C_DROP_MARKER, S.C_WAIT_1,RoverRuckusRobotCfg.MainServoName.MARKER,RoverRuckusRobotCfg.MarkerPresets.RELEASE,true);
+        b.addWait(S.C_WAIT_1, S.C_DRIVE_4, Time.fromSeconds(0.5));
+        b.addDrive(S.C_DRIVE_4,S.C_TURN_2,Distance.fromFeet(1),.5,135,45);
+
+        if(moveToOpponentCrater){
+            b.addGyroTurn(S.C_TURN_2,S.C_DRIVE_5, 90,.5);
+            b.addDrive(S.C_DRIVE_5,S.C_TURN_3,Distance.fromFeet(1),.5,90,90);
+            b.addGyroTurn(S.C_TURN_3,S.C_DRIVE_6, 135,.5);
+            b.addDrive(S.C_DRIVE_6,S.C_DRIVE_6A,Distance.fromFeet(.3),.5,45,135);
+            b.addDrive(S.C_DRIVE_6A,S.C_DRIVE_6B,Distance.fromFeet(.2),.5,225,135);
+            b.addDrive(S.C_DRIVE_6B,S.STOP,Distance.fromFeet(7.5),1,135,135);
+        } else {
+            b.addGyroTurn(S.C_TURN_2,S.C_DRIVE_5, 225,.5);
+            b.addDrive(S.C_DRIVE_5,S.STOP,Distance.fromFeet(3),1,225,225);
+        }
+
+
+
     }
 
     private void buildDepotStateMachine(EVStateMachineBuilder b, boolean moveToOpponentCrater) {
@@ -343,31 +379,36 @@ public class RoverRuckusAuto3 extends AbstractAutoOp<RoverRuckusRobotCfg> {
         //gold on left side for depot
         b.addWait(S.DLG_BRANCH_START,S.DLG_STRAFFE_1,0);
         b.addDrive(S.DLG_STRAFFE_1, S.DLG_STRAFFE_2,Distance.fromFeet(1.65),.5,310,0);
-        b.addDrive(S.DLG_STRAFFE_2,S.DLG_TURN_1,Distance.fromFeet(.3),.5,270,0);
-        b.addGyroTurn(S.DLG_TURN_1,S.DLG_DRIVE_1,315, 0.5);
-        b.addDrive(S.DLG_DRIVE_1,S.DLG_DRIVE_2,Distance.fromFeet(.3),.5,225,315);
-        b.addDrive(S.DLG_STRAFFE_2,S.DLG_TURN_2,Distance.fromFeet(.3),.5,45,315);
+        b.addDrive(S.DLG_STRAFFE_2,S.DLG_DRIVE_1,Distance.fromFeet(.3),.5,270,0);
+        b.addDrive(S.DLG_DRIVE_1,S.DLG_DRIVE_2,Distance.fromFeet(1.8),.5,225,0);
+        b.addDrive(S.DLG_DRIVE_2,S.DLG_TURN_2,Distance.fromFeet(.3),.5,90,0);
         b.addGyroTurn(S.DLG_TURN_2,S.DLG_DRIVE_4,270, 0.5);
-        b.addDrive(S.DLG_DRIVE_4,S.D_DROP_MARKER,Distance.fromFeet(.1),.5,180,270);
+        b.addDrive(S.DLG_DRIVE_4,S.D_DROP_MARKER,Distance.fromFeet(.1),.5,270,270);
         //gold on right side for depot
         b.addWait(S.DRG_BRANCH_START,S.DRG_STRAFFE_1,0);
-        b.addDrive(S.DRG_STRAFFE_1, S.STOP,Distance.fromFeet(1.8),.5,225 ,0);
+        b.addDrive(S.DRG_STRAFFE_1, S.DRG_STRAFE_2,Distance.fromFeet(1.8),.5,225 ,0);
+        b.addDrive(S.DRG_STRAFE_2, S.DRG_STRAFE_3,Distance.fromFeet(.3),.5,270 ,0);
+        b.addDrive(S.DRG_STRAFE_3, S.DRG_STRAFE_4,Distance.fromFeet(1.8),.5,315 ,0);
+        b.addDrive(S.DRG_STRAFE_4, S.DRG_STRAFE_5,Distance.fromFeet(.5),.5,270 ,0);
+        b.addDrive(S.DRG_STRAFE_5, S.DRG_TURN_1,Distance.fromFeet(.2),.5,90 ,0);
+        b.addGyroTurn(S.DRG_TURN_1, S.D_DROP_MARKER,270, .5);
 
 //this is common across all branches for depot
         b.addServo(S.D_DROP_MARKER, S.D_WAIT_1,RoverRuckusRobotCfg.MainServoName.MARKER,RoverRuckusRobotCfg.MarkerPresets.RELEASE,true);
         b.addWait(S.D_WAIT_1, S.D_BACKUP_2, Time.fromSeconds(0.5));
-        b.addDrive(S.D_BACKUP_2, S.D_TURN_CRATER, Distance.fromFeet(.2),.5,90,270);
+        b.addDrive(S.D_BACKUP_2, S.D_CLOSE_SERVO, Distance.fromFeet(.5),.5,90,270);
+        b.addServo(S.D_CLOSE_SERVO, S.D_TURN_CRATER,RoverRuckusRobotCfg.MainServoName.MARKER,RoverRuckusRobotCfg.MarkerPresets.HOLD,false);
         if (moveToOpponentCrater) {
             b.addGyroTurn(S.D_TURN_CRATER,S.D_OPP_DRIVE_1,45, 0.5);
             b.addDrive(S.D_OPP_DRIVE_1,S.D_OPP_DRIVE_2,Distance.fromFeet(.65),.5,315,45);
-            b.addDrive(S.D_OPP_DRIVE_2,S.D_OPP_DRIVE_3,Distance.fromFeet(.1),.1,135,45);
-            b.addDrive(S.D_OPP_DRIVE_3,S.STOP,Distance.fromFeet(8),1,45,45);
+            b.addDrive(S.D_OPP_DRIVE_2,S.D_OPP_DRIVE_3,Distance.fromFeet(.03),.1,135,45);
+            b.addDrive(S.D_OPP_DRIVE_3,S.STOP,Distance.fromFeet(8),.8,45,45);
         }
         else {
             b.addGyroTurn(S.D_TURN_CRATER,S.D_OUR_DRIVE_1,135, 0.5);
             b.addDrive(S.D_OUR_DRIVE_1,S.D_OUR_DRIVE_2,Distance.fromFeet(.65),.5,225,135);
-            b.addDrive(S.D_OUR_DRIVE_2,S.D_OUR_DRIVE_3,Distance.fromFeet(.1),.5,45,135);
-            b.addDrive(S.D_OUR_DRIVE_3,S.STOP,Distance.fromFeet(8),1,135,135);
+            b.addDrive(S.D_OUR_DRIVE_2,S.D_OUR_DRIVE_3,Distance.fromFeet(.03),.5,45,135);
+            b.addDrive(S.D_OUR_DRIVE_3,S.STOP,Distance.fromFeet(8),.8,135,135);
         }
 
 
@@ -462,7 +503,10 @@ public class RoverRuckusAuto3 extends AbstractAutoOp<RoverRuckusRobotCfg> {
 
         DMG_TURN1, D_DROP_MARKER, D_BACKUP_2, D_BACKUP_1, D_WAIT_1, D_OPP_DRIVE_1, D_OPP_DRIVE_2, D_OPP_DRIVE_3,
         D_OUR_DRIVE_1, D_TURN_CRATER, D_OUR_DRIVE_2, D_OUR_DRIVE_3, DLG_STRAFFE_2, DLG_TURN_1,
-        DLG_DRIVE_1, DLG_DRIVE_2, DLG_DRIVE_4, DLG_TURN_2;
+        DLG_DRIVE_1, DLG_DRIVE_2, DLG_DRIVE_4, DLG_TURN_2,
+        DRG_TURN_1, DRG_STRAFE_5, DRG_STRAFE_4, DRG_STRAFE_3, CMG_DRIVE_2, CMG_DRIVE_3, C_TURN_1,
+        CLG_DRIVE_1, CLG_DRIVE_2, CLG_DRIVE_3, CRG_DRIVE_1, CRG_DRIVE_2, CRG_DRIVE_3, C_DRIVE_1,
+        C_DRIVE_2, C_DRIVE_3, C_DROP_MARKER, C_WAIT_1, C_DRIVE_4, C_DRIVE_6, C_TURN_3, C_TURN_2, C_DRIVE_5, C_DRIVE_6A, C_DRIVE_6B, D_CLOSE_SERVO, DRG_STRAFE_2
 
 
     }
