@@ -13,6 +13,8 @@ import ftc.electronvolts.util.TeamColor;
 import ftc.electronvolts.util.Utility;
 import evlib.opmodes.AbstractOptionsOp;
 
+import static org.firstinspires.ftc.teamcode.relic2017.Sparky2017.OptionsOp.slowSpeedFraction;
+
 
 /**
  * Created by ftc7393 on 12/6/2017.
@@ -41,6 +43,9 @@ public class RoverRuckusOptionsOp extends AbstractOptionsOp {
     public static final boolean isStartingDepotDefault=false;
     public static final boolean moveToOpponentCraterDefault=true;
     public static final boolean doCameraSamplingDefault=true;
+    public static final String wait="wait";
+    public static final double waitDefault=0;
+
 
 
 //    public static final String slowSpeedFraction = "slowSpeedFraction";
@@ -84,13 +89,13 @@ public class RoverRuckusOptionsOp extends AbstractOptionsOp {
 //            optionsFile.set(teamColorTag, TeamColor.BLUE);
 //        }
 //        telemetry.addData("*1 red/blue button => " + teamColorTag, optionsFile.get(teamColorTag, TeamColor.UNKNOWN));
-        if(driver1.dpad_right.justPressed()){
+        if(driver1.right_stick_button.justPressed()){
             optionsFile.set(isStartingDepot,true);
         }
-        if(driver1.dpad_left.justPressed()){
+        if(driver1.left_stick_button.justPressed()){
             optionsFile.set(isStartingDepot,false);
         }
-        telemetry.addData("dLeft=false,dRight=true " + isStartingDepot, optionsFile.get(isStartingDepot, Boolean.class,null));
+        telemetry.addData("left_stick_button=false,right_stick_button=true " + isStartingDepot, optionsFile.get(isStartingDepot, Boolean.class,null));
 
 
         if(driver1.right_bumper.justPressed()){
@@ -108,23 +113,24 @@ public class RoverRuckusOptionsOp extends AbstractOptionsOp {
         if(driver1.y.justPressed()){
             optionsFile.set(doCameraSampling,false);
         }
+
         telemetry.addData("y=false,x=true " + doCameraSampling, optionsFile.get(doCameraSampling, Boolean.class,null));
 
 
-//
-//        double slowSpeedFrac = optionsFile.get(slowSpeedFraction, slowSpeedFractionDefault);
-//        if (driver1.dpad_up.justPressed()) {
-//            slowSpeedFrac += .05;
-//        }
-//
-//        if (driver1.dpad_down.justPressed()) {
-//            slowSpeedFrac -= .05;
-//        }
-//        slowSpeedFrac = Utility.limit(slowSpeedFrac, 0.05, 1.0);
-//
-//        optionsFile.set(slowSpeedFraction, slowSpeedFrac);
-//        telemetry.addData("*1 dpad up/down => " + slowSpeedFraction, String.format(Locale.ENGLISH, "%4.2f", slowSpeedFrac));
-//
+        double waitTime = optionsFile.get(wait, waitDefault);
+
+        if (driver1.dpad_up.justPressed()) {
+            waitTime += .25;
+        }
+
+        if (driver1.dpad_down.justPressed()) {
+            waitTime -= .25;
+        }
+        waitTime = Utility.limit(waitTime, 0.00, 15.0);
+
+        optionsFile.set(wait, waitTime);
+        telemetry.addData("*1 dpad up/down => " + wait, String.format(Locale.ENGLISH, "%4.2f", waitTime));
+
 //
 //        double fastSpeedFrac = optionsFile.get(fastSpeedFraction, fastSpeedFractionDefault);
 //        if (driver1.dpad_left.justPressed()) {

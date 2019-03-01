@@ -242,7 +242,8 @@ public class RoverRuckusRobotCfg extends RobotCfg {
     public enum PhonePanPresets{
         MIDDLE,
         LEFT,
-        RIGHT
+        RIGHT,
+        STOW
 
     }
     public enum MainServoName implements ServoName {
