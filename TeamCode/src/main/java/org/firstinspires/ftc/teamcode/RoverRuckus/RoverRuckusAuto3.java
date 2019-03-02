@@ -166,17 +166,19 @@ public class RoverRuckusAuto3 extends AbstractAutoOp<RoverRuckusRobotCfg> {
         isStartingDepot=optionsFile.get(RoverRuckusOptionsOp.isStartingDepot,RoverRuckusOptionsOp.isStartingDepotDefault);
         moveToOpponentCrater=optionsFile.get(RoverRuckusOptionsOp.moveToOpponentCrater,RoverRuckusOptionsOp.moveToOpponentCraterDefault);
         double waitForAlliance = optionsFile.get(RoverRuckusOptionsOp.wait,RoverRuckusOptionsOp.waitDefault);
+        boolean defendCrater = !optionsFile.get(RoverRuckusOptionsOp.Opts.DO_CLAIM_CRATER_SIDE.s,RoverRuckusOptionsOp.claimFromCraterSideDefault);
+        boolean doPartnerSample = optionsFile.get(RoverRuckusOptionsOp.Opts.DO_PARTNER_SAMPLE.s,RoverRuckusOptionsOp.doPartnerSampleDefault);
+        boolean doDescend = optionsFile.get(RoverRuckusOptionsOp.Opts.DESCEND.s,RoverRuckusOptionsOp.descendDefault); //this needs to be in the options op
 
-        boolean doPartnerSample = true; //this needs to be in the options op
-        if(!moveToOpponentCrater){
-            orientationDepot=-45;
-            directionDepot=-135;
-        }
-        else{
-            orientationDepot=-135;
-            directionDepot=-45;
-
-        }
+//        if(!moveToOpponentCrater){
+//            orientationDepot=-45;
+//            directionDepot=-135;
+//        }
+//        else{
+//            orientationDepot=-135;
+//            directionDepot=-45;
+//
+//        }
         final ResultReceiver <Mineral> mineralResultReceiver = new BasicResultReceiver<>();
 
         final ResultReceiver<Boolean> actResultReceiver=new BasicResultReceiver<>();
@@ -184,8 +186,16 @@ public class RoverRuckusAuto3 extends AbstractAutoOp<RoverRuckusRobotCfg> {
         int numCycles = 3;
         ObjectDetector.initThread(numCycles, telemetry,hardwareMap,mineralResultReceiver,actResultReceiver, potentialMineralResultReceiver) ;
 
+
         //!!!!!!!!!! CHANGE START CONDITION
-        EVStateMachineBuilder b = robotCfg.createEVStateMachineBuilder(S.DESCEND, teamColor, Angle.fromDegrees(3));//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+        StateName firstState;
+        if(doDescend){
+            firstState = S.DESCEND;
+        }
+        else {
+            firstState = S.RELEASE_LATCH;
+        }
+        EVStateMachineBuilder b = robotCfg.createEVStateMachineBuilder(firstState, teamColor, Angle.fromDegrees(3));//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
         double descentTime = 6.0;
 
          b.add(S.DESCEND, createDescendState(S.RELEASE_LATCH, descentTime));
@@ -324,7 +334,7 @@ public class RoverRuckusAuto3 extends AbstractAutoOp<RoverRuckusRobotCfg> {
         if (isStartingDepot) {
             buildDepotStateMachine(b, moveToOpponentCrater, doPartnerSample, waitForAlliance);
         } else {
-            buildCraterSM(b, moveToOpponentCrater, waitForAlliance);
+            buildCraterSM(b, moveToOpponentCrater, waitForAlliance, defendCrater);
         }
         b.addStop(S.STOP);
 
@@ -332,7 +342,7 @@ public class RoverRuckusAuto3 extends AbstractAutoOp<RoverRuckusRobotCfg> {
         return b.build();
     }
 
-    private void buildCraterSM(EVStateMachineBuilder b, boolean moveToOpponentCrater, double waitForAlliance) {
+    private void buildCraterSM(EVStateMachineBuilder b, boolean moveToOpponentCrater, double waitForAlliance, boolean defendCrater) {
         b.addWait(S.CMG_BRANCH_START,S.CMG_STRAFFE_1,0);
         b.addDrive(S.CMG_STRAFFE_1, S.CMG_DRIVE_2,Distance.fromFeet(.85),.5,270,0);
         b.addDrive(S.CMG_DRIVE_2, S.CMG_DRIVE_3,Distance.fromFeet(.45),.5,90,0);
@@ -349,7 +359,14 @@ public class RoverRuckusAuto3 extends AbstractAutoOp<RoverRuckusRobotCfg> {
         b.addDrive(S.CRG_DRIVE_2, S.CRG_DRIVE_3,Distance.fromFeet(.43),.5,90,0);
         b.addDrive(S.CRG_DRIVE_3, S.C_DRIVE_0,Distance.fromFeet(4.25),.5,0,0);
 
+        if(defendCrater) {
+            b.addWait(S.C_DRIVE_0, S.CD_TURN_0, Time.fromSeconds(0));
+            b.addGyroTurn(S.CD_TURN_0,S.CD_DRIVE_0, 180,.5);
+            b.addDrive(S.CD_DRIVE_0, S.CD_DRIVE_1,Distance.fromFeet(5),.5,180,180);
+            b.addDrive(S.CD_DRIVE_1, S.STOP,Distance.fromFeet(1.5),.5,270,135);
+            return;
 
+        }
 
         //Common for crater from now until end on method
 
@@ -422,15 +439,17 @@ public class RoverRuckusAuto3 extends AbstractAutoOp<RoverRuckusRobotCfg> {
             b.addGyroTurn(S.D_TURN_CRATER,S.D_OUR_DRIVE_1,135, 0.5);
             b.addDrive(S.D_OUR_DRIVE_1,S.D_OUR_DRIVE_2,Distance.fromFeet(.65),.5,225,135);
             b.addDrive(S.D_OUR_DRIVE_2,S.D_OUR_DRIVE_3,Distance.fromFeet(.03),.5,45,135);
-            b.addDrive(S.D_OUR_DRIVE_3,S.D_SAMPLE_DECISION,Distance.fromFeet(8),.8,135,135);
             if(doPartnerSample) {
-                b.add(S.D_SAMPLE_DECISION, decideSample(S.SAMPLE_PARTNER, S.STOP));
-                b.addDrive(S.SAMPLE_PARTNER, S.SP_DRIVE_1,Distance.fromFeet(0.6),0.5,315,135);
-                b.addDrive(S.SP_DRIVE_1, S.SP_DRIVE_2,Distance.fromFeet(1.3),0.5,90,135);
-                b.addDrive(S.SP_DRIVE_2, S.STOP,Distance.fromFeet(1.2),0.5,180,135);
+                b.addDrive(S.D_OUR_DRIVE_3,S.STOP,Distance.fromFeet(8.1),.8,135,135-14);
+                //   b.add(S.D_SAMPLE_DECISION, decideSample(S.SAMPLE_PARTNER, S.STOP));
+             //   b.addDrive(S.SAMPLE_PARTNER, S.SP_DRIVE_1,Distance.fromFeet(0.6),0.5,315,135);
+             //   b.addDrive(S.SP_DRIVE_1, S.SP_DRIVE_2,Distance.fromFeet(1.3),0.5,90,135);
+             //   b.addDrive(S.SP_DRIVE_2, S.STOP,Distance.fromFeet(1.2),0.5,180,135);
             }
             else {
-                b.addWait(S.D_SAMPLE_DECISION,S.STOP,0);
+                b.addDrive(S.D_OUR_DRIVE_3,S.STOP,Distance.fromFeet(8),.8,135,135);
+
+//                b.addWait(S.D_SAMPLE_DECISION,S.STOP,0);
             }
 
 
@@ -554,7 +573,7 @@ public class RoverRuckusAuto3 extends AbstractAutoOp<RoverRuckusRobotCfg> {
         DRG_TURN_1, DRG_STRAFE_5, DRG_STRAFE_4, DRG_STRAFE_3, CMG_DRIVE_2, CMG_DRIVE_3, C_TURN_1,
         CLG_DRIVE_1, CLG_DRIVE_2, CLG_DRIVE_3, CRG_DRIVE_1, CRG_DRIVE_2, CRG_DRIVE_3, C_DRIVE_1,
         C_DRIVE_2, C_DRIVE_3, C_DROP_MARKER, C_WAIT_1, C_DRIVE_4, C_DRIVE_6, C_TURN_3, C_TURN_2,
-        C_DRIVE_5, C_DRIVE_6A, C_DRIVE_6B, D_CLOSE_SERVO, D_SAMPLE_DECISION, SAMPLE_PARTNER, SP_DRIVE_1, SP_DRIVE_2, C_DRIVE_0, STOW_SERVO, C_LEVER_UP, C_BACK_1, C_ALLIANCE_WAIT, C_DRIVE_7, DRG_STRAFE_2
+        C_DRIVE_5, C_DRIVE_6A, C_DRIVE_6B, D_CLOSE_SERVO, D_SAMPLE_DECISION, SAMPLE_PARTNER, SP_DRIVE_1, SP_DRIVE_2, C_DRIVE_0, STOW_SERVO, C_LEVER_UP, C_BACK_1, C_ALLIANCE_WAIT, C_DRIVE_7, CD_DRIVE_0, CD_TURN_0, CD_DRIVE_1, DRG_STRAFE_2
 
 
     }

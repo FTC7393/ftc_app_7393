@@ -21,6 +21,26 @@ import static org.firstinspires.ftc.teamcode.relic2017.Sparky2017.OptionsOp.slow
  */
 @TeleOp(name = "OptionsOp")
 public class RoverRuckusOptionsOp extends AbstractOptionsOp {
+
+    public enum Opts {
+        IS_STARTING_DEPOT("isStartingDepot"),
+        MOVE_TO_OPPONENT_CRATER("moveToOpponentCrater"),
+        DO_CAMERA_SAMPLING("doCameraSampling"),
+        WAIT_TIME("wait"),
+        DO_PARTNER_SAMPLE("doPartnerSample"),
+        DO_CLAIM_CRATER_SIDE("doClaimCraterSide"),
+        DESCEND("descend");
+
+//        public boolean b;
+//        public double f;
+        public String s;
+
+        Opts(String s) {
+            this.s = s;
+        }
+    }
+    private Opts[] values;
+    int index = 0;
     /**
      * The filename will be set by the subclasses
      *
@@ -28,6 +48,7 @@ public class RoverRuckusOptionsOp extends AbstractOptionsOp {
      */
     public RoverRuckusOptionsOp(String filename) {
         super(filename);
+        values = Opts.values();
     }
 
 
@@ -45,218 +66,109 @@ public class RoverRuckusOptionsOp extends AbstractOptionsOp {
     public static final boolean doCameraSamplingDefault=true;
     public static final String wait="wait";
     public static final double waitDefault=0;
+    public static final boolean claimFromCraterSideDefault = true;
+    public static boolean doPartnerSampleDefault = false;
+    public static boolean descendDefault = true;
 
 
 
-//    public static final String slowSpeedFraction = "slowSpeedFraction";
-//    private static final double slowSpeedFractionDefault = 0.5;
-//    public static final String fastSpeedFraction = "fastSpeedFraction";
-//    private static final double fastSpeedFractionDefault = 1;
 
-//    private DigitalInputEdgeDetector driver1_left_stick_y_up, driver1_left_stick_y_down;
 
     public RoverRuckusOptionsOp() {
         super(FILENAME);
+        values = Opts.values();
     }
 
     @Override
     protected void go() {
         super.go();
-//        driver1_left_stick_y_up = new DigitalInputEdgeDetector(new InputExtractor<Boolean>() {
-//            @Override
-//            public Boolean getValue() {
-//                return driver1.left_stick_y.getValue() <= -0.5;
-//            }
-//        });
-//        driver1_left_stick_y_down = new DigitalInputEdgeDetector(new InputExtractor<Boolean>() {
-//            @Override
-//            public Boolean getValue() {
-//                return driver1.left_stick_y.getValue() >= 0.5;
-//            }
-//        });
+
     }
 
     @Override
     protected void act() {
-//        driver1_left_stick_y_up.update();
-//        driver1_left_stick_y_down.update();
-        //use gamepad to change options
+
+//        if(driver1.right_stick_button.justPressed()){
+//            optionsFile.set(isStartingDepot,true);
+//        }
+//        if(driver1.left_stick_button.justPressed()){
+//            optionsFile.set(isStartingDepot,false);
+//        }
+//        telemetry.addData("left_stick_button=false,right_stick_button=true " + isStartingDepot, optionsFile.get(isStartingDepot, Boolean.class,null));
 //
-//        if (driver1.b.justPressed()) {
-//            optionsFile.set(teamColorTag, TeamColor.RED);
+//
+//        if(driver1.right_bumper.justPressed()){
+//            optionsFile.set(moveToOpponentCrater,true);
 //        }
-//        if (driver1.x.justPressed()) {
-//            optionsFile.set(teamColorTag, TeamColor.BLUE);
+//        if(driver1.left_bumper.justPressed()){
+//            optionsFile.set(moveToOpponentCrater,false);
 //        }
-//        telemetry.addData("*1 red/blue button => " + teamColorTag, optionsFile.get(teamColorTag, TeamColor.UNKNOWN));
-        if(driver1.right_stick_button.justPressed()){
-            optionsFile.set(isStartingDepot,true);
+//        telemetry.addData("lb=false,rb=true " + moveToOpponentCrater, optionsFile.get(moveToOpponentCrater, Boolean.class,null));
+//
+//
+//        if(driver1.x.justPressed()){
+//            optionsFile.set(doCameraSampling,true);
+//        }
+//        if(driver1.y.justPressed()){
+//            optionsFile.set(doCameraSampling,false);
+//        }
+//
+//        telemetry.addData("y=false,x=true " + doCameraSampling, optionsFile.get(doCameraSampling, Boolean.class,null));
+//
+//
+//        double waitTime = optionsFile.get(wait, waitDefault);
+//
+//        if (driver1.dpad_up.justPressed()) {
+//            waitTime += .25;
+//        }
+//
+//        if (driver1.dpad_down.justPressed()) {
+//            waitTime -= .25;
+//        }
+//        waitTime = Utility.limit(waitTime, 0.00, 15.0);
+//
+//        optionsFile.set(wait, waitTime);
+//        telemetry.addData("*1 dpad up/down => " + wait, String.format(Locale.ENGLISH, "%4.2f", waitTime));
+        telemetry.addData("option",values[index]);
+        if(driver1.x.justPressed()){
+            index++;
+            if(index>=values.length)
+                index = 0;
         }
-        if(driver1.left_stick_button.justPressed()){
-            optionsFile.set(isStartingDepot,false);
-        }
-        telemetry.addData("left_stick_button=false,right_stick_button=true " + isStartingDepot, optionsFile.get(isStartingDepot, Boolean.class,null));
-
-
-        if(driver1.right_bumper.justPressed()){
-            optionsFile.set(moveToOpponentCrater,true);
+        if(driver1.b.justPressed()){
+            index--;
+            if(index<0){
+                index = values.length-1;
+            }
         }
         if(driver1.left_bumper.justPressed()){
-            optionsFile.set(moveToOpponentCrater,false);
+            if(values[index] == Opts.WAIT_TIME) {
+                double waitTime = optionsFile.get(wait, waitDefault);
+                waitTime -=0.25;
+                waitTime = Utility.limit(waitTime, 0.00, 15.0);
+                optionsFile.set(Opts.WAIT_TIME.s,waitTime);
+            }
+            else {
+                optionsFile.set(values[index].s, false);
+            }
         }
-        telemetry.addData("lb=false,rb=true " + moveToOpponentCrater, optionsFile.get(moveToOpponentCrater, Boolean.class,null));
-
-
-        if(driver1.x.justPressed()){
-            optionsFile.set(doCameraSampling,true);
+        if(driver1.right_bumper.justPressed()) {
+            if (values[index] == Opts.WAIT_TIME) {
+                double waitTime = optionsFile.get(wait, waitDefault);
+                waitTime += 0.25;
+                waitTime = Utility.limit(waitTime, 0.00, 15.0);
+                optionsFile.set(Opts.WAIT_TIME.s, waitTime);
+            } else {
+                optionsFile.set(values[index].s, true);
+            }
         }
-        if(driver1.y.justPressed()){
-            optionsFile.set(doCameraSampling,false);
-        }
+            if(values[index] == Opts.WAIT_TIME) {
+                telemetry.addData("currentValue", optionsFile.get(values[index].s,waitDefault));
+            }
+            else {
+                telemetry.addData("currentValue", optionsFile.get(values[index].s,false));
+            }
 
-        telemetry.addData("y=false,x=true " + doCameraSampling, optionsFile.get(doCameraSampling, Boolean.class,null));
-
-
-        double waitTime = optionsFile.get(wait, waitDefault);
-
-        if (driver1.dpad_up.justPressed()) {
-            waitTime += .25;
-        }
-
-        if (driver1.dpad_down.justPressed()) {
-            waitTime -= .25;
-        }
-        waitTime = Utility.limit(waitTime, 0.00, 15.0);
-
-        optionsFile.set(wait, waitTime);
-        telemetry.addData("*1 dpad up/down => " + wait, String.format(Locale.ENGLISH, "%4.2f", waitTime));
-
-//
-//        double fastSpeedFrac = optionsFile.get(fastSpeedFraction, fastSpeedFractionDefault);
-//        if (driver1.dpad_left.justPressed()) {
-//            fastSpeedFrac += .05;
-//        }
-//
-//        if (driver1.dpad_right.justPressed()) {
-//            fastSpeedFrac -= .05;
-//        }
-//        fastSpeedFrac = Utility.limit(fastSpeedFrac, 0.05, 1.0);
-//        optionsFile.set(slowSpeedFraction, fastSpeedFrac);
-//        telemetry.addData("*1 dpad lift/right => " + fastSpeedFrac, String.format(Locale.ENGLISH, "%4.2f", fastSpeedFrac));
-//
-//
-//        double collectDistanceInches = optionsFile.get(collectDistanceInchesTag, collectDistanceDefault);
-//        if (driver1.dpad_left.justPressed()) {
-//            collectDistanceInches -= 0.5;
-//        }
-//
-//        if (driver1.dpad_right.justPressed()) {
-//            collectDistanceInches += 0.5;
-//        }
-//        collectDistanceInches = Utility.limit(collectDistanceInches, 0, 12 * 6); //limit to 6 feet
-//        optionsFile.set(collectDistanceInchesTag, collectDistanceInches);
-//        telemetry.addData("*1 dpad left/right => " + collectDistanceInchesTag, String.format(Locale.ENGLISH, "%3.1f", collectDistanceInches) + " inches");
-//
-//
-//        if (driver1.left_bumper.justPressed()) {
-//            optionsFile.set(isStartingCornerTag, false);
-//        }
-//        if (driver1.right_bumper.justPressed()) {
-//            optionsFile.set(isStartingCornerTag, true);
-//        }
-//        telemetry.addData("*1 left/right bumper => " + isStartingCornerTag, optionsFile.get(isStartingCornerTag, Boolean.class, null));
-
-
-//        if (driver1.left_stick_button.justPressed()) {
-//            optionsFile.set(doBeaconsTag, false);
-//        }
-//        if (driver1.right_stick_button.justPressed()) {
-//            optionsFile.set(doBeaconsTag, true);
-//        }
-//        telemetry.addData("*1 left/right stick button => " + doBeaconsTag, optionsFile.get(doBeaconsTag, Boolean.class, null));
-
-
-//        if (driver1.a.justPressed()) {
-//            optionsFile.set(doCapBallTag, false);
-//        }
-//        if (driver1.y.justPressed()) {
-//            optionsFile.set(doCapBallTag, true);
-//        }
-//        telemetry.addData("*1 a/y button => " + doCapBallTag, optionsFile.get(doCapBallTag, Boolean.class, null));
-//
-//
-//        if (driver1.right_stick_y.getValue() > 0.5) {
-//            optionsFile.set(doRecollectionTag, false);
-//        }
-//        if (driver1.right_stick_y.getValue() < -0.5) {
-//            optionsFile.set(doRecollectionTag, true);
-//        }
-//        telemetry.addData("*1 right stick y => " + doRecollectionTag, optionsFile.get(doRecollectionTag, Boolean.class, null));
-//
-//
-//        if (driver1.left_trigger.getValue() >= 0.7) {
-//            optionsFile.set(doCollectTag, false);
-//        }
-//        if (driver1.right_trigger.getValue() >= 0.7) {
-//            optionsFile.set(doCollectTag, true);
-//        }
-//        telemetry.addData("*1 left/right trigger => " + doCollectTag, optionsFile.get(doCollectTag, Boolean.class, null));
-//
-//
-//        int shots = optionsFile.get(shotsTag, shotsDefault);
-//        if (driver1_left_stick_y_up.justPressed()) {
-//            shots++;
-//        }
-//        if (driver1_left_stick_y_down.justPressed()) {
-//            shots--;
-//        }
-//
-//        shots = (int) Utility.limit(shots, 0, 3);
-//        optionsFile.set(shotsTag, shots);
-//        telemetry.addData("*1 left_stick_y => " + shotsTag, shots);
-
-//        double gain = optionsFile.get("gyro_gain", 0.1);
-//        double max = optionsFile.get("gyro_max", 0.1);
-//        gain += 1e-3 * pow10floor(gain) * matchTimer.getDeltaTime() * driver1.left_stick_y.getValue();
-//        max += 1e-3 * pow10floor(max) * matchTimer.getDeltaTime() * driver1.right_stick_y.getValue();
-//
-//
-//        telemetry.addData("* left joystick y => gyro_gain", gain);
-//        telemetry.addData("* right joystick y => gyro_max", max);
-//
-//        optionsFile.set("gyro_gain", gain);
-//        optionsFile.set("gyro_max", max);
-
-
-//        double WALL_FOLLOW_TRANSLATE_VELOCITY = optionsFile.get("WALL_FOLLOW_TRANSLATE_VELOCITY", .1);
-//        double WALL_FOLLOW_MAX_ANGULAR_SPEED = optionsFile.get("WALL_FOLLOW_MAX_ANGULAR_SPEED", .5);
-
-//        WALL_FOLLOW_TRANSLATE_VELOCITY += 1e-3 * driver2.left_stick_y.getValue();
-//        WALL_FOLLOW_MAX_ANGULAR_SPEED += 1e-3 * driver2.right_stick_y.getValue();
-//        WALL_FOLLOW_TRANSLATE_VELOCITY += 1e-3 * pow10floor(WALL_FOLLOW_TRANSLATE_VELOCITY) * driver2.left_stick_y.getValue();
-//        WALL_FOLLOW_MAX_ANGULAR_SPEED += 1e-3 * pow10floor(WALL_FOLLOW_MAX_ANGULAR_SPEED) * driver2.right_stick_y.getValue();
-
-//        telemetry.addData("WALL_FOLLOW_TRANSLATE_VELOCITY", WALL_FOLLOW_TRANSLATE_VELOCITY);
-//        telemetry.addData("WALL_FOLLOW_MAX_ANGULAR_SPEED", WALL_FOLLOW_MAX_ANGULAR_SPEED);
-
-//        optionsFile.set("WALL_FOLLOW_TRANSLATE_VELOCITY", WALL_FOLLOW_TRANSLATE_VELOCITY);
-//        optionsFile.set("WALL_FOLLOW_MAX_ANGULAR_SPEED", WALL_FOLLOW_MAX_ANGULAR_SPEED);
-
-//        if (driver2.a.justPressed()) {
-//            optionsFile.set(ejectBadParticlesTag, false);
-//        }
-//        if (driver2.y.justPressed()) {
-//            optionsFile.set(ejectBadParticlesTag, true);
-//        }
-//        telemetry.addData("*2 a/y button => " + ejectBadParticlesTag, optionsFile.get(ejectBadParticlesTag, Boolean.class, null));
-//
-//        if (driver2.left_trigger.getValue() >= 0.7) {
-//            optionsFile.set(useShooterSensorTag, false);
-//        }
-//        if (driver2.right_trigger.getValue() >= 0.7) {
-//            optionsFile.set(useShooterSensorTag, true);
-//        }
-//        telemetry.addData("*2 left/right trigger bumper => " + useShooterSensorTag, optionsFile.get(useShooterSensorTag, Boolean.class, null));
 
     }
 
